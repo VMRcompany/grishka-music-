@@ -21,26 +21,21 @@
     <script type="module">
         import React, { useState, useEffect, useCallback, useRef, useMemo } from 'https://esm.sh/react@19';
         import ReactDOM from 'https://esm.sh/react-dom@19/client';
-        import { initializeApp } from 'https://esm.sh/firebase@11.4.0/app';
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://esm.sh/firebase@11.4.0/auth';
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, runTransaction, serverTimestamp, increment } from 'https://esm.sh/firebase@11.4.0/firestore';
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://esm.sh/firebase@11.4.0/storage';
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
         import { GoogleGenAI, Type } from 'https://esm.sh/@google/genai';
         import htm from 'https://esm.sh/htm';
         import * as Lucide from 'https://esm.sh/lucide-react';
 
         const h = htm.bind(React.createElement);
-        const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music, Heart, Trash2, LogOut, LogIn } = Lucide;
+        const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music } = Lucide;
 
         const ENV = {
+            SUPABASE_URL: '{{VITE_SUPABASE_URL}}',
+            SUPABASE_ANON_KEY: '{{VITE_SUPABASE_ANON_KEY}}',
             GEMINI_API_KEY: '{{GEMINI_API_KEY}}'
         };
 
-        const firebaseConfig = {{FIREBASE_CONFIG}};
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-        const auth = getAuth(app);
-        const storage = getStorage(app);
+        const supabase = (ENV.SUPABASE_URL && ENV.SUPABASE_ANON_KEY) ? createClient(ENV.SUPABASE_URL, ENV.SUPABASE_ANON_KEY) : null;
         const ai = new GoogleGenAI({ apiKey: ENV.GEMINI_API_KEY });
 
         const translations = {
@@ -204,38 +199,29 @@
             `;
         };
 
-        const MusicCard = ({ song, onPlay, onDownload, onAddToPlaylist, onToggleFavorite, onDelete, isFavorite, user, theme }) => {
-            const isOwner = user && song.authorId === user.uid;
-            
-            return h`
-                <div className=${`group transition-all duration-200 relative flex items-center md:flex-col md:items-start gap-3 md:gap-0 p-2 md:p-3 rounded-xl md:rounded-[24px] ${theme === 'dark' ? 'bg-transparent hover:bg-white/5' : 'bg-transparent hover:bg-gray-100'}`}>
-                    <div className="relative w-14 h-14 md:w-full md:aspect-square shrink-0 cursor-pointer overflow-hidden rounded-lg md:rounded-[20px] shadow-sm" onClick=${() => onPlay(song)}>
-                        <img src=${song.coverUrl} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                        ${!song.isUserUploaded && h`<div className="absolute top-2 left-2 z-10 bg-blue-600/90 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Sparkles} size=${12} fill="white" /></div>`}
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg"><${Play} fill="white" size=${24} className="ml-1" /></div>
-                        </div>
+        const MusicCard = ({ song, onPlay, onDownload, onAddToPlaylist, theme }) => h`
+            <div className=${`group transition-all duration-200 relative flex items-center md:flex-col md:items-start gap-3 md:gap-0 p-2 md:p-3 rounded-xl md:rounded-[24px] ${theme === 'dark' ? 'bg-transparent hover:bg-white/5' : 'bg-transparent hover:bg-gray-100'}`}>
+                <div className="relative w-14 h-14 md:w-full md:aspect-square shrink-0 cursor-pointer overflow-hidden rounded-lg md:rounded-[20px] shadow-sm" onClick=${() => onPlay(song)}>
+                    <img src=${song.coverUrl} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                    ${!song.isUserUploaded && h`<div className="absolute top-2 left-2 z-10 bg-blue-600/90 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Sparkles} size=${12} fill="white" /></div>`}
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg"><${Play} fill="white" size=${24} className="ml-1" /></div>
                     </div>
-                    <div className="flex-1 min-w-0 md:mt-3 md:w-full">
-                        <div className="flex justify-between items-start gap-1">
-                            <div className="flex-1 min-w-0" onClick=${() => onPlay(song)}>
-                                <h3 className=${`font-bold truncate text-sm md:text-[15px] leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>${song.title}</h3>
-                                <p className=${`text-[12px] md:text-sm font-medium truncate mt-0.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>${song.artist}</p>
-                            </div>
-                            <div className="flex items-center gap-0.5">
-                                <button onClick=${(e) => { e.stopPropagation(); onToggleFavorite(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-red-500/10 ${isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}>
-                                    <${Heart} size=${18} fill=${isFavorite ? "currentColor" : "none"} />
-                                    ${song.favoritesCount > 0 && h`<span className="text-[10px] ml-0.5 font-bold">${song.favoritesCount}</span>`}
-                                </button>
-                                <button onClick=${(e) => { e.stopPropagation(); onDownload(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-blue-500/10 ${theme === 'dark' ? 'text-gray-400 hover:text-green-500' : 'text-gray-400 hover:text-green-600'}`}><${Download} size=${18} /></button>
-                                <button onClick=${(e) => { e.stopPropagation(); onAddToPlaylist(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-blue-500/10 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-500' : 'text-gray-400 hover:text-blue-600'}`}><${PlusCircle} size=${18} /></button>
-                                ${isOwner && h`<button onClick=${(e) => { e.stopPropagation(); onDelete(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-red-500/10 text-gray-400 hover:text-red-500`}><${Trash2} size=${18} /></button>`}
-                            </div>
+                </div>
+                <div className="flex-1 min-w-0 md:mt-3 md:w-full">
+                    <div className="flex justify-between items-start gap-1">
+                        <div className="flex-1 min-w-0" onClick=${() => onPlay(song)}>
+                            <h3 className=${`font-bold truncate text-sm md:text-[15px] leading-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>${song.title}</h3>
+                            <p className=${`text-[12px] md:text-sm font-medium truncate mt-0.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>${song.artist}</p>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                            <button onClick=${(e) => { e.stopPropagation(); onDownload(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-blue-500/10 ${theme === 'dark' ? 'text-gray-400 hover:text-green-500' : 'text-gray-400 hover:text-green-600'}`}><${Download} size=${18} /></button>
+                            <button onClick=${(e) => { e.stopPropagation(); onAddToPlaylist(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-blue-500/10 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-500' : 'text-gray-400 hover:text-blue-600'}`}><${PlusCircle} size=${18} /></button>
                         </div>
                     </div>
                 </div>
-            `;
-        };
+            </div>
+        `;
 
         const Settings = ({ t, currentLang, theme, onClose, onLanguageChange, onThemeChange }) => h`
             <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -269,7 +255,7 @@
             </div>
         `;
 
-        const UploadModal = ({ t, theme, user, onClose, onUpload }) => {
+        const UploadModal = ({ t, theme, onClose, onUpload }) => {
             const [file, setFile] = useState(null);
             const [cover, setCover] = useState(null);
             const [title, setTitle] = useState('');
@@ -280,36 +266,27 @@
             const handleFileChange = (e) => { if (e.target.files?.[0]) { setFile(e.target.files[0]); if (!title) setTitle(e.target.files[0].name.replace(/\.[^/.]+$/, "")); } };
             const handleCoverChange = (e) => { if (e.target.files?.[0]) { const reader = new FileReader(); reader.onload = (ev) => setCover(ev.target?.result); reader.readAsDataURL(e.target.files[0]); } };
             const handleSubmit = async (e) => {
-                e.preventDefault(); if (!file || isPublishing || !user) return;
+                e.preventDefault(); if (!file || isPublishing || !supabase) return;
                 setIsPublishing(true);
                 try {
-                    const audioRef = ref(storage, `audio/${Date.now()}_${file.name}`);
-                    await uploadBytes(audioRef, file);
-                    const audioUrl = await getDownloadURL(audioRef);
-
+                    const fileExt = file.name.split('.').pop();
+                    const fileName = `${Math.random()}.${fileExt}`;
+                    const filePath = `audio/${fileName}`;
+                    const { error: uploadError } = await supabase.storage.from('music').upload(filePath, file);
+                    if (uploadError) throw uploadError;
+                    const { data: { publicUrl: audioUrl } } = supabase.storage.from('music').getPublicUrl(filePath);
                     let coverUrl = "https://picsum.photos/seed/music/400/400";
                     const coverInput = e.currentTarget.querySelector('#cover-input')?.files?.[0];
                     if (coverInput) {
-                        const coverStorageRef = ref(storage, `covers/${Date.now()}_${coverInput.name}`);
-                        await uploadBytes(coverStorageRef, coverInput);
-                        coverUrl = await getDownloadURL(coverStorageRef);
+                        const coverExt = coverInput.name.split('.').pop();
+                        const coverFileName = `${Math.random()}.${coverExt}`;
+                        const coverPath = `covers/${coverFileName}`;
+                        const { error: coverUploadError } = await supabase.storage.from('music').upload(coverPath, coverInput);
+                        if (!coverUploadError) { const { data: { publicUrl } } = supabase.storage.from('music').getPublicUrl(coverPath); coverUrl = publicUrl; }
                     }
-
-                    const songData = {
-                        title: title || 'Unnamed Track',
-                        artist: artist || 'Anonymous',
-                        genre: tags,
-                        audioUrl,
-                        coverUrl,
-                        authorId: user.uid,
-                        authorEmail: user.email,
-                        createdAt: serverTimestamp(),
-                        favoritesCount: 0,
-                        isUserUploaded: true
-                    };
-
-                    const docRef = await addDoc(collection(db, 'songs'), songData);
-                    onUpload({ ...songData, id: docRef.id, createdAt: new Date().toISOString() });
+                    const { data: newSong, error: dbError } = await supabase.from('songs').insert([{ title: title || 'Unnamed Track', artist: artist || 'Anonymous', genre: tags, duration: '3:20', duration_sec: 200, audio_url: audioUrl, cover_url: coverUrl, is_user_uploaded: true, published_by: "User" }]).select().single();
+                    if (dbError) throw dbError;
+                    onUpload({ ...newSong, id: newSong.id, title: newSong.title, artist: newSong.artist, durationSec: newSong.duration_sec, audioUrl: newSong.audio_url, coverUrl: newSong.cover_url, isUserUploaded: newSong.is_user_uploaded });
                     onClose();
                 } catch (err) { alert("Upload failed: " + err.message); setIsPublishing(false); }
             };
