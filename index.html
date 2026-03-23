@@ -809,14 +809,38 @@
 
         // --- Initialization ---
         async function initApp() {
-            if (!firebaseConfig || !firebaseConfig.projectId) {
-                ReactDOM.createRoot(document.getElementById('root')).render(h`
-                    <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white p-8 text-center">
-                        <${AlertTriangle} size=${64} className="text-yellow-500 mb-6" />
-                        <h1 className="text-2xl font-black mb-4 uppercase">Конфигурация не найдена</h1>
-                        <p className="text-gray-400 max-w-md">Пожалуйста, проверьте настройки Firebase в коде index.html.</p>
+            const rootElement = document.getElementById('root');
+            const renderError = (title, message, details = null) => {
+                ReactDOM.createRoot(rootElement).render(h`
+                    <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white p-6 text-center">
+                        <${AlertTriangle} size=${64} className="text-red-500 mb-6" />
+                        <h1 className="text-2xl md:text-3xl font-black mb-4 uppercase tracking-tight">${title}</h1>
+                        <p className="text-gray-400 mb-6 max-w-md font-bold">${message}</p>
+                        ${details && h`
+                            <div className="bg-white/5 p-6 rounded-3xl text-left mb-8 max-w-2xl w-full border border-white/10">
+                                <h3 className="text-blue-500 font-black text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                                    <${Info} size=${14} /> Инструкция по исправлению:
+                                </h3>
+                                <div className="space-y-3 text-sm text-gray-300 font-medium">
+                                    ${details.map((step, i) => h`<p key=${i} className="flex gap-3">
+                                        <span className="text-blue-500 font-black">${i + 1}.</span> ${step}
+                                    </p>`)}
+                                </div>
+                            </div>
+                        `}
+                        <button onClick=${() => window.location.reload()} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-blue-600/20">
+                            Перезагрузить страницу
+                        </button>
                     </div>
                 `);
+            };
+
+            if (!firebaseConfig || !firebaseConfig.projectId) {
+                renderError(
+                    "Конфигурация не найдена",
+                    "Пожалуйста, проверьте настройки Firebase в коде index.html.",
+                    ["Убедитесь, что объект firebaseConfig заполнен корректными данными из консоли Firebase."]
+                );
                 return;
             }
 
@@ -825,58 +849,68 @@
                 const app = initializeApp(firebaseConfig);
                 
                 console.log("Initializing Firestore...");
-                // Attempt to initialize with named database first
                 const useNamed = firebaseConfig.firestoreDatabaseId && 
                                 firebaseConfig.firestoreDatabaseId !== '(default)' && 
                                 firebaseConfig.firestoreDatabaseId !== '';
                 
-                if (useNamed) {
-                    try {
-                        console.log("Attempting named database:", firebaseConfig.firestoreDatabaseId);
+                const consoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`;
+                const authSettingsUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;
+
+                try {
+                    if (useNamed) {
                         db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-                        // Quick check if it's actually available
+                        // Probe check to verify service availability
                         await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                            if (err.message.includes('not available') || err.message.includes('not found')) {
-                                throw err;
-                            }
+                            // If it's just a permission error, it means the service IS available
+                            if (err.code === 'permission-denied' || err.code === 'not-found') return;
+                            if (err.message.includes('not available') || err.message.includes('not found') || err.message.includes('offline')) throw err;
                         });
-                    } catch (e) {
-                        console.warn("Named database unavailable, falling back to default:", e.message);
-                        db = getFirestore(app);
+                    } else {
+                        throw new Error("No named database");
                     }
-                } else {
-                    console.log("Using default database");
-                    db = getFirestore(app);
+                } catch (e) {
+                    console.warn("Named database failed, trying default...", e.message);
+                    try {
+                        db = getFirestore(app);
+                        await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
+                            if (err.code === 'permission-denied' || err.code === 'not-found') return;
+                            if (err.message.includes('not available') || err.message.includes('offline')) throw err;
+                        });
+                    } catch (e2) {
+                        const isVercel = window.location.hostname.includes('vercel.app');
+                        renderError(
+                            "Firestore недоступен",
+                            "Сервис Firestore не активирован или проект не настроен для этого домена.",
+                            [
+                                h`Перейдите в <a href="${consoleUrl}" target="_blank" class="text-blue-500 underline font-black">Firebase Console -> Firestore</a> и нажмите <b>"Create Database"</b>.`,
+                                h`Убедитесь, что ID базы данных (<b>${firebaseConfig.firestoreDatabaseId}</b>) создан в консоли. Если нет — создайте базу с таким ID или используйте "(default)".`,
+                                isVercel ? h`Так как вы используете Vercel, перейдите в <a href="${authSettingsUrl}" target="_blank" class="text-blue-500 underline font-black">Auth -> Settings -> Authorized Domains</a> и добавьте <b>${window.location.hostname}</b>.` : "Если вы запускаете проект локально, убедитесь, что у вас есть доступ к интернету.",
+                                "Проверьте, что правила безопасности (firestore.rules) развернуты через AIS Build."
+                            ]
+                        );
+                        return;
+                    }
                 }
 
-                console.log("Initializing Auth...");
                 auth = getAuth(app);
-                console.log("Initializing Storage...");
                 storage = getStorage(app);
                 
-                const apiKey = '{{GEMINI_API_KEY}}'.startsWith('{{') ? '' : '{{GEMINI_API_KEY}}';
-                ai = new GoogleGenAI({ apiKey });
+                // Gemini API Key Handling
+                let apiKey = '{{GEMINI_API_KEY}}';
+                if (apiKey.startsWith('{{')) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    apiKey = urlParams.get('gemini_key') || '';
+                }
+                ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
 
-                // Start rendering the app
                 if (db && auth) {
-                    console.log("Firebase services initialized, rendering app...");
-                    ReactDOM.createRoot(document.getElementById('root')).render(
+                    ReactDOM.createRoot(rootElement).render(
                         h(ErrorBoundary, null, h(App))
                     );
-                } else {
-                    throw new Error("Firebase services (db or auth) failed to initialize");
                 }
             } catch (error) {
                 console.error("Initialization error:", error);
-                ReactDOM.createRoot(document.getElementById('root')).render(h`
-                    <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white p-8 text-center">
-                        <${AlertTriangle} size=${64} className="text-red-500 mb-6" />
-                        <h1 className="text-2xl font-black mb-4 uppercase tracking-tight">Ошибка инициализации</h1>
-                        <p className="text-gray-400 mb-4 max-w-md font-bold">${error.message}</p>
-                        <p className="text-gray-500 text-xs mb-8 max-w-md">Попробуйте настроить Firebase заново через чат, если вы только что создали копию приложения.</p>
-                        <button onClick=${() => window.location.reload()} className="px-8 py-3 bg-blue-600 rounded-full font-black uppercase tracking-widest text-xs">Перезагрузить</button>
-                    </div>
-                `);
+                renderError("Ошибка запуска", error.message);
             }
         }
 
