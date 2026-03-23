@@ -32,6 +32,9 @@
         const h = htm.bind(React.createElement);
         const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music, Heart, Trash2, LogOut, LogIn, AlertTriangle, MinusCircle } = Lucide;
 
+        // Global instances
+        let db, auth, storage, ai;
+
         // Load configuration at runtime
         async function loadConfig() {
             try {
@@ -39,24 +42,38 @@
                 if (!response.ok) throw new Error('Config file not found');
                 return await response.json();
             } catch (e) {
-                console.warn('Could not load firebase-applet-config.json, using defaults', e);
-                return {};
+                console.error('Critical: Could not load firebase-applet-config.json', e);
+                return null;
             }
         }
 
         async function initApp() {
             const firebaseConfig = await loadConfig();
             
+            if (!firebaseConfig || !firebaseConfig.projectId) {
+                ReactDOM.createRoot(document.getElementById('root')).render(h`
+                    <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white p-8 text-center">
+                        <${AlertTriangle} size=${64} className="text-yellow-500 mb-6" />
+                        <h1 className="text-2xl font-black mb-4 uppercase">Конфигурация не найдена</h1>
+                        <p className="text-gray-400 max-w-md">Файл firebase-applet-config.json отсутствует или пуст. Пожалуйста, убедитесь, что он находится в корневой папке.</p>
+                    </div>
+                `);
+                return;
+            }
+
             // Initialize Firebase SDK
             const app = initializeApp(firebaseConfig);
-            const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-            const auth = getAuth(app);
-            const storage = getStorage(app);
-            const ai = new GoogleGenAI({ apiKey: '{{GEMINI_API_KEY}}' });
+            db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+            auth = getAuth(app);
+            storage = getStorage(app);
+            
+            const apiKey = '{{GEMINI_API_KEY}}'.startsWith('{{') ? '' : '{{GEMINI_API_KEY}}';
+            ai = new GoogleGenAI({ apiKey });
 
             // Start rendering the app
-            const root = createRoot(document.getElementById('root'));
-            root.render(h(ErrorBoundary, null, h(App, { db, auth, storage, ai })));
+            ReactDOM.createRoot(document.getElementById('root')).render(
+                h(ErrorBoundary, null, h(App))
+            );
         }
 
         initApp();
