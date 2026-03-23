@@ -48,34 +48,7 @@
             measurementId: ""
         };
 
-        async function initApp() {
-            if (!firebaseConfig || !firebaseConfig.projectId) {
-                ReactDOM.createRoot(document.getElementById('root')).render(h`
-                    <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white p-8 text-center">
-                        <${AlertTriangle} size=${64} className="text-yellow-500 mb-6" />
-                        <h1 className="text-2xl font-black mb-4 uppercase">Конфигурация не найдена</h1>
-                        <p className="text-gray-400 max-w-md">Пожалуйста, проверьте настройки Firebase в коде index.html.</p>
-                    </div>
-                `);
-                return;
-            }
-
-            // Initialize Firebase SDK
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-            auth = getAuth(app);
-            storage = getStorage(app);
-            
-            const apiKey = '{{GEMINI_API_KEY}}'.startsWith('{{') ? '' : '{{GEMINI_API_KEY}}';
-            ai = new GoogleGenAI({ apiKey });
-
-            // Start rendering the app
-            ReactDOM.createRoot(document.getElementById('root')).render(
-                h(ErrorBoundary, null, h(App))
-            );
-        }
-
-        initApp();
+        // --- Initialization ---
 
         const OperationType = {
             CREATE: 'create',
@@ -87,6 +60,7 @@
         };
 
         const handleFirestoreError = (error, operationType, path) => {
+            if (!auth) return { error: 'Auth not initialized' };
             const errInfo = {
                 error: error instanceof Error ? error.message : String(error),
                 authInfo: {
@@ -174,7 +148,7 @@
             `;
         };
 
-        const Header = ({ t, theme, user, searchQuery, setSearchQuery, onSearch, onOpenSettings, onToggleTheme, onOpenVoiceSearch, onLogin, onLogout }) => {
+        const Header = ({ t, language, theme, user, searchQuery, setSearchQuery, onSearch, onOpenSettings, onToggleTheme, onOpenVoiceSearch, onLogin, onLogout }) => {
             const handleSubmit = (e) => { e.preventDefault(); onSearch(searchQuery); };
             const handleChange = (e) => { const val = e.target.value; setSearchQuery(val); onSearch(val); };
 
@@ -575,6 +549,7 @@
 
         // --- Firebase Connection Test ---
         async function testConnection() {
+            if (!db) return;
             try {
                 await getDoc(doc(db, 'test', 'connection'));
             } catch (error) {
@@ -583,7 +558,6 @@
                 }
             }
         }
-        testConnection();
 
         const App = () => {
             const [user, setUser] = useState(null);
@@ -816,7 +790,7 @@
                     <audio ref=${audioRef} onPlay=${() => setIsPlaying(true)} onPause=${() => setIsPlaying(false)} />
                     <${Sidebar} t=${t} activeTab=${activeTab} setActiveTab=${setActiveTab} theme=${theme} playlists=${playlists} onCreatePlaylist=${() => setIsCreatePlaylistOpen(true)} />
                     <main className="flex-1 flex flex-col overflow-hidden relative">
-                        <${Header} t=${t} theme=${theme} user=${user} searchQuery=${searchQuery} setSearchQuery=${setSearchQuery} onSearch=${handleSearch} onOpenSettings=${() => setIsSettingsOpen(true)} onToggleTheme=${() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} onOpenVoiceSearch=${() => setIsVoiceSearchOpen(true)} onLogin=${handleLogin} onLogout=${handleLogout} />
+                        <${Header} t=${t} language=${language} theme=${theme} user=${user} searchQuery=${searchQuery} setSearchQuery=${setSearchQuery} onSearch=${handleSearch} onOpenSettings=${() => setIsSettingsOpen(true)} onToggleTheme=${() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')} onOpenVoiceSearch=${() => setIsVoiceSearchOpen(true)} onLogin=${handleLogin} onLogout=${handleLogout} />
                         <div className="flex-1 overflow-y-auto px-4 md:px-8 pb-72 md:pb-48">
                             <div className="py-6 md:py-8 flex items-center justify-between"><button onClick=${() => setIsUploadOpen(true)} className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-full text-xs font-black"><${Plus} size=${16} /> ${t.upload}</button></div>
                             ${renderContent()}
@@ -833,7 +807,80 @@
             `;
         };
 
-        ReactDOM.createRoot(document.getElementById('root')).render(h`<${ErrorBoundary}><${App} /></${ErrorBoundary}>`);
+        // --- Initialization ---
+        async function initApp() {
+            if (!firebaseConfig || !firebaseConfig.projectId) {
+                ReactDOM.createRoot(document.getElementById('root')).render(h`
+                    <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white p-8 text-center">
+                        <${AlertTriangle} size=${64} className="text-yellow-500 mb-6" />
+                        <h1 className="text-2xl font-black mb-4 uppercase">Конфигурация не найдена</h1>
+                        <p className="text-gray-400 max-w-md">Пожалуйста, проверьте настройки Firebase в коде index.html.</p>
+                    </div>
+                `);
+                return;
+            }
+
+            try {
+                console.log("Initializing Firebase app...");
+                const app = initializeApp(firebaseConfig);
+                
+                console.log("Initializing Firestore...");
+                // Attempt to initialize with named database first
+                const useNamed = firebaseConfig.firestoreDatabaseId && 
+                                firebaseConfig.firestoreDatabaseId !== '(default)' && 
+                                firebaseConfig.firestoreDatabaseId !== '';
+                
+                if (useNamed) {
+                    try {
+                        console.log("Attempting named database:", firebaseConfig.firestoreDatabaseId);
+                        db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+                        // Quick check if it's actually available
+                        await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
+                            if (err.message.includes('not available') || err.message.includes('not found')) {
+                                throw err;
+                            }
+                        });
+                    } catch (e) {
+                        console.warn("Named database unavailable, falling back to default:", e.message);
+                        db = getFirestore(app);
+                    }
+                } else {
+                    console.log("Using default database");
+                    db = getFirestore(app);
+                }
+
+                console.log("Initializing Auth...");
+                auth = getAuth(app);
+                console.log("Initializing Storage...");
+                storage = getStorage(app);
+                
+                const apiKey = '{{GEMINI_API_KEY}}'.startsWith('{{') ? '' : '{{GEMINI_API_KEY}}';
+                ai = new GoogleGenAI({ apiKey });
+
+                // Start rendering the app
+                if (db && auth) {
+                    console.log("Firebase services initialized, rendering app...");
+                    ReactDOM.createRoot(document.getElementById('root')).render(
+                        h(ErrorBoundary, null, h(App))
+                    );
+                } else {
+                    throw new Error("Firebase services (db or auth) failed to initialize");
+                }
+            } catch (error) {
+                console.error("Initialization error:", error);
+                ReactDOM.createRoot(document.getElementById('root')).render(h`
+                    <div className="flex flex-col items-center justify-center min-h-screen bg-[#030303] text-white p-8 text-center">
+                        <${AlertTriangle} size=${64} className="text-red-500 mb-6" />
+                        <h1 className="text-2xl font-black mb-4 uppercase tracking-tight">Ошибка инициализации</h1>
+                        <p className="text-gray-400 mb-4 max-w-md font-bold">${error.message}</p>
+                        <p className="text-gray-500 text-xs mb-8 max-w-md">Попробуйте настроить Firebase заново через чат, если вы только что создали копию приложения.</p>
+                        <button onClick=${() => window.location.reload()} className="px-8 py-3 bg-blue-600 rounded-full font-black uppercase tracking-widest text-xs">Перезагрузить</button>
+                    </div>
+                `);
+            }
+        }
+
+        initApp();
     </script>
 </body>
 </html>
