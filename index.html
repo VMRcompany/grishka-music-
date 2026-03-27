@@ -1129,14 +1129,19 @@
                     } catch (e2) {
                         const isVercel = window.location.hostname.includes('vercel.app');
                         const errorMsg = e2.message || String(e2);
+                        const isConfigMismatch = errorMsg.includes('not found') || errorMsg.includes('not available');
+                        
                         renderError(
                             "Firestore недоступен",
                             `Ошибка: ${errorMsg}`,
                             [
-                                h`Перейдите в <a href="${consoleUrl}" target="_blank" class="text-blue-500 underline font-black">Firebase Console -> Firestore</a> и нажмите <b>"Create Database"</b>.`,
-                                h`Убедитесь, что ID базы данных (<b>${firebaseConfig.firestoreDatabaseId}</b>) создан в консоли. Если нет — создайте базу с таким ID или используйте "(default)".`,
-                                isVercel ? h`Так как вы используете Vercel, перейдите в <a href="${authSettingsUrl}" target="_blank" class="text-blue-500 underline font-black">Auth -> Settings -> Authorized Domains</a> и добавьте <b>${window.location.hostname}</b>.` : "Если вы запускаете проект локально, убедитесь, что у вас есть доступ к интернету.",
-                                "Проверьте, что правила безопасности (firestore.rules) развернуты через AIS Build."
+                                h`<b>Проект:</b> <span class="text-blue-400">${firebaseConfig.projectId}</span>`,
+                                h`<b>База данных:</b> <span class="text-blue-400">${firebaseConfig.firestoreDatabaseId || '(default)'}</span>`,
+                                h`<hr class="border-white/10 my-2" />`,
+                                h`1. Перейдите в <a href="${consoleUrl}" target="_blank" class="text-blue-500 underline font-black">Firebase Console -> Firestore</a> и нажмите <b>"Create Database"</b>.`,
+                                h`2. Убедитесь, что база данных с ID <b>${firebaseConfig.firestoreDatabaseId || '(default)'}</b> создана.`,
+                                isVercel ? h`3. Перейдите в <a href="${authSettingsUrl}" target="_blank" class="text-blue-500 underline font-black">Auth -> Settings -> Authorized Domains</a> и добавьте <b>${window.location.hostname}</b>.` : "3. Если вы запускаете проект локально, проверьте интернет.",
+                                h`4. Если вы используете свой проект, обновите <b>firebaseConfig</b> в коде index.html.`
                             ]
                         );
                         return;
