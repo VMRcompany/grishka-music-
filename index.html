@@ -24,14 +24,14 @@
         import ReactDOM from 'https://esm.sh/react-dom@19/client';
         import { initializeApp } from 'https://esm.sh/firebase@11.4.0/app';
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://esm.sh/firebase@11.4.0/auth';
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, runTransaction, serverTimestamp, increment } from 'https://esm.sh/firebase@11.4.0/firestore';
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, runTransaction, serverTimestamp, increment } from 'https://esm.sh/firebase@11.4.0/firestore';
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://esm.sh/firebase@11.4.0/storage';
         import { GoogleGenAI, Type } from 'https://esm.sh/@google/genai';
         import htm from 'https://esm.sh/htm';
         import * as Lucide from 'https://esm.sh/lucide-react';
 
         const h = htm.bind(React.createElement);
-        const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music, Heart, Trash2, LogOut, LogIn, AlertTriangle, MinusCircle } = Lucide;
+        const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music, Heart, Trash2, LogOut, LogIn, AlertTriangle, MinusCircle, Share2, Video, Headphones } = Lucide;
 
         // Global instances
         let db, auth, storage, ai;
@@ -42,7 +42,7 @@
             appId: "1:1028257117288:web:c4b079e2ccf1becbc177dd",
             apiKey: "AIzaSyC-Ot04UT6IYPH9M0kS54srXu6eI9UgmqQ",
             authDomain: "gen-lang-client-0020876863.firebaseapp.com",
-            firestoreDatabaseId: "ai-studio-7b42d141-d638-4b3d-b484-a7c1c0a5bcbc",
+            firestoreDatabaseId: "(default)",
             storageBucket: "gen-lang-client-0020876863.firebasestorage.app",
             messagingSenderId: "1028257117288",
             measurementId: ""
@@ -86,10 +86,10 @@
 
         const translations = {
             en: {
-                home: 'Home', explore: 'Explore', library: 'Library', myMusic: 'My Music', searchPlaceholder: 'Search tracks...', settings: 'Settings', language: 'Language', upgrade: 'Upgrade', newReleases: 'Global Feed', quickPicks: 'Quick Picks', recommended: 'Recommendations', likedSongs: 'Liked Songs', selectLanguage: 'Select Language', resultsFor: 'Results for', searching: 'Searching...', rating: 'Rating', reviews: 'Reviews', writeReview: 'Write a review', submit: 'Post', theme: 'Theme', light: 'Light', dark: 'Dark', account: 'About Platform', privacy: 'Privacy', audioQuality: 'Audio Quality', upload: 'Publish Music', uploadDesc: 'Share your track with the world', selectFile: 'Select MP3/WAV', publish: 'Publish Track', preview: 'Cover Preview', beFirst: 'The world is quiet. Be the first to upload a track!', emptyLibrary: 'Your library is empty. Upload some music!', hashtags: 'Hashtags (comma separated)', createPlaylist: 'New Playlist', addToPlaylist: 'Add to playlist', playlists: 'Playlists', selectPlaylist: 'Select Playlist', playlistName: 'Playlist Name', playlistIcon: 'Playlist Icon', visibility: 'Visibility', public: 'Public', private: 'Private', create: 'Create', cancel: 'Cancel', noResults: 'No results found.', voiceSearchTitle: 'Voice Search', searchByMusic: 'Search by Music', listening: 'Listening...', analyzing: 'Analyzing music...', searchByVoice: 'Search by Voice'
+                home: 'Home', explore: 'Explore', library: 'Library', myMusic: 'My Music', searchPlaceholder: 'Search tracks...', settings: 'Settings', language: 'Language', upgrade: 'Upgrade', newReleases: 'Global Feed', quickPicks: 'Quick Picks', recommended: 'Recommendations', likedSongs: 'Liked Songs', selectLanguage: 'Select Language', resultsFor: 'Results for', searching: 'Searching...', rating: 'Rating', reviews: 'Reviews', writeReview: 'Write a review', submit: 'Post', theme: 'Theme', light: 'Light', dark: 'Dark', account: 'About Platform', privacy: 'Privacy', audioQuality: 'Audio Quality', upload: 'Publish Music', uploadDesc: 'Share your track with the world', selectFile: 'Select MP3/WAV', selectVideo: 'Select Video (Optional)', publish: 'Publish Track', preview: 'Cover Preview', beFirst: 'The world is quiet. Be the first to upload a track!', emptyLibrary: 'Your library is empty. Upload some music!', hashtags: 'Hashtags (comma separated)', createPlaylist: 'New Playlist', addToPlaylist: 'Add to playlist', playlists: 'Playlists', selectPlaylist: 'Select Playlist', playlistName: 'Playlist Name', playlistIcon: 'Playlist Icon', visibility: 'Visibility', public: 'Public', private: 'Private', create: 'Create', cancel: 'Cancel', noResults: 'No results found.', voiceSearchTitle: 'Voice Search', searchByMusic: 'Search by Music', listening: 'Listening...', analyzing: 'Analyzing music...', searchByVoice: 'Search by Voice', share: 'Share', audio: 'Audio', video: 'Video', song: 'Song', copied: 'Link copied to clipboard!'
             },
             ru: {
-                home: 'Главная', explore: 'Обзор', library: 'Библиотека', myMusic: 'Моя музыка', searchPlaceholder: 'Поиск треков...', settings: 'Настройки', language: 'Язык', upgrade: 'Подписка', newReleases: 'Мировая лента', quickPicks: 'Быстрый выбор', recommended: 'Рекомендации', likedSongs: 'Любимые песни', selectLanguage: 'Выберите язык', resultsFor: 'Результаты для', searching: 'Поиск...', rating: 'Рейтинг', reviews: 'Отзывы', writeReview: 'Написать отзыв', submit: 'Опубликовать', theme: 'Тема', light: 'Светлая', dark: 'Темная', account: 'О платформе', privacy: 'Конфиденциальность', audioQuality: 'Качество звука', upload: 'Загрузить музыку', uploadDesc: 'Поделитесь треком со всем миром', selectFile: 'Выбрать файл', publish: 'Опубликовать трек', preview: 'Предпросмотр обложки', beFirst: 'В мире тишина. Станьте первым, кто загрузит трек!', emptyLibrary: 'Ваша библиотека пуста. Загрузите что-нибудь!', hashtags: 'Хэштеги (через запятую)', createPlaylist: 'Создать плейлист', addToPlaylist: 'Добавить в плейлист', playlists: 'Плейлисты', selectPlaylist: 'Выберите плейлист', playlistName: 'Название плейлиста', playlistIcon: 'Иконка плейлиста', visibility: 'Видимость', public: 'Публичный', private: 'Приватный', create: 'Создать', cancel: 'Отмена', noResults: 'Ничего не найдено.', voiceSearchTitle: 'Голосовой поиск', searchByMusic: 'Поиск по музыке', listening: 'Слушаю...', analyzing: 'Анализирую музыку...', searchByVoice: 'Искать голосом'
+                home: 'Главная', explore: 'Обзор', library: 'Библиотека', myMusic: 'Моя музыка', searchPlaceholder: 'Поиск треков...', settings: 'Настройки', language: 'Язык', upgrade: 'Подписка', newReleases: 'Мировая лента', quickPicks: 'Быстрый выбор', recommended: 'Рекомендации', likedSongs: 'Любимые песни', selectLanguage: 'Выберите язык', resultsFor: 'Результаты для', searching: 'Поиск...', rating: 'Рейтинг', reviews: 'Отзывы', writeReview: 'Написать отзыв', submit: 'Опубликовать', theme: 'Тема', light: 'Светлая', dark: 'Темная', account: 'О платформе', privacy: 'Конфиденциальность', audioQuality: 'Качество звука', upload: 'Загрузить музыку', uploadDesc: 'Поделитесь треком со всем миром', selectFile: 'Выбрать аудио', selectVideo: 'Выбрать видео (опционально)', publish: 'Опубликовать трек', preview: 'Предпросмотр обложки', beFirst: 'В мире тишина. Станьте первым, кто загрузит трек!', emptyLibrary: 'Ваша библиотека пуста. Загрузите что-нибудь!', hashtags: 'Хэштеги (через запятую)', createPlaylist: 'Создать плейлист', addToPlaylist: 'Добавить в плейлист', playlists: 'Плейлисты', selectPlaylist: 'Выберите плейлист', playlistName: 'Название плейлиста', playlistIcon: 'Иконка плейлиста', visibility: 'Видимость', public: 'Публичный', private: 'Приватный', create: 'Создать', cancel: 'Отмена', noResults: 'Ничего не найдено.', voiceSearchTitle: 'Голосовой поиск', searchByMusic: 'Поиск по музыке', listening: 'Слушаю...', analyzing: 'Анализирую музыку...', searchByVoice: 'Искать голосом', share: 'Поделиться', audio: 'Аудио', video: 'Видео', song: 'Песня', copied: 'Ссылка скопирована!'
             }
         };
 
@@ -192,20 +192,47 @@
             const [volume, setVolume] = useState(80);
             const [isMuted, setIsMuted] = useState(false);
             const [prevVolume, setPrevVolume] = useState(80);
+            const [playerMode, setPlayerMode] = useState('audio'); // 'audio' or 'video'
+            const videoRef = useRef(null);
+            const t = translations[getCookie('gm_lang') || 'ru'];
 
             useEffect(() => {
                 const audio = audioRef.current;
                 if (!audio) return;
-                const updateProgress = () => { setCurrentTime(audio.currentTime); setDuration(audio.duration || currentSong?.durationSec || 0); };
+                const updateProgress = () => { 
+                    setCurrentTime(audio.currentTime); 
+                    setDuration(audio.duration || currentSong?.durationSec || 0); 
+                    if (videoRef.current) videoRef.current.currentTime = audio.currentTime;
+                };
                 audio.addEventListener('timeupdate', updateProgress);
                 audio.addEventListener('loadedmetadata', updateProgress);
                 return () => { audio.removeEventListener('timeupdate', updateProgress); audio.removeEventListener('loadedmetadata', updateProgress); };
             }, [audioRef, currentSong]);
 
+            useEffect(() => {
+                if (videoRef.current) {
+                    if (isPlaying && playerMode === 'video') videoRef.current.play().catch(() => {});
+                    else videoRef.current.pause();
+                }
+            }, [isPlaying, playerMode]);
+
             const handleProgressChange = (e) => { if (audioRef.current) { const newTime = parseFloat(e.target.value); audioRef.current.currentTime = newTime; setCurrentTime(newTime); } };
             const toggleMute = () => { if (audioRef.current) { if (isMuted) { const restoreVol = prevVolume === 0 ? 80 : prevVolume; audioRef.current.volume = restoreVol / 100; setVolume(restoreVol); setIsMuted(false); } else { setPrevVolume(volume); audioRef.current.volume = 0; setVolume(0); setIsMuted(true); } } };
             const handleVolumeChange = (e) => { const val = parseInt(e.target.value); setVolume(val); if (audioRef.current) { audioRef.current.volume = val / 100; setIsMuted(val === 0); } };
             const formatTime = (time) => { if (isNaN(time)) return "0:00"; const mins = Math.floor(time / 60); const secs = Math.floor(time % 60); return `${mins}:${secs.toString().padStart(2, '0')}`; };
+
+            const handleShare = async (e) => {
+                e.stopPropagation();
+                const shareUrl = `${window.location.origin}/${currentSong.slug}`;
+                if (navigator.share) {
+                    try {
+                        await navigator.share({ title: currentSong.title, text: `Listening to ${currentSong.title} by ${currentSong.artist} on Grishka Music!`, url: shareUrl });
+                    } catch (err) { console.error("Share failed:", err); }
+                } else {
+                    navigator.clipboard.writeText(shareUrl);
+                    alert(t.copied);
+                }
+            };
 
             if (!currentSong) return null;
 
@@ -227,7 +254,9 @@
                     </div>
                     <div className=${`w-full flex items-center justify-between gap-2 md:gap-0 ${isFullScreen ? 'flex-col flex-1 justify-center' : ''}`}>
                         <div className=${`flex items-center gap-3 md:gap-4 ${isFullScreen ? 'flex-col mb-12' : 'hidden md:flex w-[25%] overflow-hidden'}`}>
-                            <img src=${currentSong.coverUrl} className=${`rounded-lg md:rounded-2xl shadow-lg object-cover transition-all ${isFullScreen ? 'w-80 h-80' : 'w-16 h-16'}`} />
+                            <div className="relative group">
+                                <img src=${currentSong.coverUrl} className=${`rounded-lg md:rounded-2xl shadow-lg object-cover transition-all ${isFullScreen ? 'w-80 h-80' : 'w-16 h-16'}`} />
+                            </div>
                             <div className=${isFullScreen ? 'text-center mt-6 w-full flex flex-col items-center gap-2' : 'overflow-hidden flex-1'}>
                                 <div className=${`font-bold ${isFullScreen ? 'text-4xl text-white marquee-container' : `text-sm truncate ${textColor}`}`}>
                                     <span className=${isFullScreen ? 'animate-marquee' : ''}>${currentSong.title}${isFullScreen && h`<span className="ml-12">${currentSong.title}</span>`}</span>
@@ -236,6 +265,12 @@
                             </div>
                         </div>
                         <div className=${`flex flex-col items-center gap-1 md:gap-2 ${isFullScreen ? 'w-full' : 'flex-1 md:max-w-[45%]'}`}>
+                            ${currentSong.videoUrl && h`
+                                <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10 mb-1">
+                                    <button onClick=${() => setPlayerMode('audio')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.song}</button>
+                                    <button onClick=${() => setPlayerMode('video')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.video}</button>
+                                </div>
+                            `}
                             <div className="flex items-center justify-center gap-5 sm:gap-6 md:gap-8 w-full">
                                 <button onClick=${onToggleShuffle} className=${`p-2 transition-all active:scale-75 ${isShuffle ? 'text-blue-500' : 'text-gray-400'}`}><${Shuffle} size=${isFullScreen ? 32 : 18} /></button>
                                 <button onClick=${onBack} className=${`p-2 cursor-pointer transition-all active:scale-75 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}><${SkipBack} size=${isFullScreen ? 40 : 24} fill="currentColor" /></button>
@@ -246,6 +281,7 @@
                             <div className="hidden md:flex w-full items-center justify-center gap-3 text-[10px] font-bold text-gray-400"><span>${formatTime(currentTime)} / ${formatTime(duration)}</span></div>
                         </div>
                         <div className=${`flex items-center gap-2 md:gap-4 justify-end ${isFullScreen ? 'w-full mt-12 px-10' : 'w-[25%] md:w-[25%]'}`}>
+                            <button onClick=${handleShare} className="text-gray-400 hover:text-blue-500 transition-colors p-2"><${Share2} size=${20} /></button>
                             <button onClick=${onDownload} className="text-gray-400 hover:text-green-500 transition-colors p-2"><${Download} size=${20} /></button>
                             <div className="hidden sm:flex items-center gap-2 md:gap-3 flex-1 justify-end max-w-[140px]">
                                 <button onClick=${toggleMute} className="text-gray-400 hover:text-blue-500 transition-colors p-1">${isMuted || volume === 0 ? h`<${VolumeX} size=${20} />` : h`<${Volume2} size=${20} />`}</button>
@@ -254,18 +290,40 @@
                             ${!isFullScreen && h`<button onClick=${() => setIsFullScreen(true)} className="text-gray-400 hover:text-blue-500 transition-colors p-2"><${Maximize2} size=${20} /></button>`}
                         </div>
                     </div>
+
+                    ${playerMode === 'video' && currentSong.videoUrl && h`
+                        <div className=${`fixed inset-0 z-[-1] bg-black flex items-center justify-center overflow-hidden ${isFullScreen ? 'opacity-100' : 'opacity-40'}`}>
+                            <video ref=${videoRef} src=${currentSong.videoUrl} className="w-full h-full object-contain" playsInline muted />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 pointer-events-none" />
+                        </div>
+                    `}
                 </div>
             `;
         };
 
         const MusicCard = ({ song, onPlay, onDownload, onAddToPlaylist, onToggleFavorite, onDelete, onRemoveFromPlaylist, isFavorite, user, theme, isInPlaylist }) => {
             const isOwner = user && song.authorId === user.uid;
+            const t = translations[getCookie('gm_lang') || 'ru'];
+
+            const handleShare = async (e) => {
+                e.stopPropagation();
+                const shareUrl = `${window.location.origin}/${song.slug}`;
+                if (navigator.share) {
+                    try {
+                        await navigator.share({ title: song.title, text: `Check out ${song.title} by ${song.artist} on Grishka Music!`, url: shareUrl });
+                    } catch (err) { console.error("Share failed:", err); }
+                } else {
+                    navigator.clipboard.writeText(shareUrl);
+                    alert(t.copied);
+                }
+            };
             
             return h`
                 <div className=${`group transition-all duration-200 relative flex items-center md:flex-col md:items-start gap-3 md:gap-0 p-2 md:p-3 rounded-xl md:rounded-[24px] ${theme === 'dark' ? 'bg-transparent hover:bg-white/5' : 'bg-transparent hover:bg-gray-100'}`}>
                     <div className="relative w-14 h-14 md:w-full md:aspect-square shrink-0 cursor-pointer overflow-hidden rounded-lg md:rounded-[20px] shadow-sm" onClick=${() => onPlay(song)}>
                         <img src=${song.coverUrl} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         ${!song.isUserUploaded && h`<div className="absolute top-2 left-2 z-10 bg-blue-600/90 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Sparkles} size=${12} fill="white" /></div>`}
+                        ${song.videoUrl && h`<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Video} size=${12} /></div>`}
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg"><${Play} fill="white" size=${24} className="ml-1" /></div>
                         </div>
@@ -277,6 +335,7 @@
                                 <p className=${`text-[12px] md:text-sm font-medium truncate mt-0.5 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>${song.artist}</p>
                             </div>
                             <div className="flex items-center gap-0.5">
+                                <button onClick=${handleShare} className="p-1.5 rounded-full transition-all hover:bg-blue-500/10 text-gray-400 hover:text-blue-500"><${Share2} size=${18} /></button>
                                 <button onClick=${(e) => { e.stopPropagation(); onToggleFavorite(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-red-500/10 ${isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}>
                                     <${Heart} size=${18} fill=${isFavorite ? "currentColor" : "none"} />
                                     ${song.favoritesCount > 0 && h`<span className="text-[10px] ml-0.5 font-bold">${song.favoritesCount}</span>`}
@@ -324,8 +383,37 @@
             </div>
         `;
 
+        const generateSlug = async (title, collectionName) => {
+            let slug = title.toLowerCase()
+                .replace(/[^\w\sа-яё-]/gi, '')
+                .trim()
+                .replace(/\s+/g, '-');
+            
+            // Basic transliteration for common Cyrillic characters
+            const cyrillicToLatin = {
+                'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+            };
+            slug = slug.split('').map(char => cyrillicToLatin[char] || char).join('');
+            
+            let finalSlug = slug;
+            let counter = 1;
+            let isUnique = false;
+            
+            while (!isUnique) {
+                const q = query(collection(db, collectionName), where('slug', '==', finalSlug));
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    isUnique = true;
+                } else {
+                    finalSlug = `${slug}-${Math.floor(Math.random() * 10000)}`;
+                }
+            }
+            return finalSlug;
+        };
+
         const UploadModal = ({ t, theme, user, onClose, onUpload }) => {
             const [file, setFile] = useState(null);
+            const [videoFile, setVideoFile] = useState(null);
             const [cover, setCover] = useState(null);
             const [title, setTitle] = useState('');
             const [artist, setArtist] = useState('');
@@ -333,6 +421,7 @@
             const [isPublishing, setIsPublishing] = useState(false);
 
             const handleFileChange = (e) => { if (e.target.files?.[0]) { setFile(e.target.files[0]); if (!title) setTitle(e.target.files[0].name.replace(/\.[^/.]+$/, "")); } };
+            const handleVideoChange = (e) => { if (e.target.files?.[0]) { setVideoFile(e.target.files[0]); } };
             const handleCoverChange = (e) => { if (e.target.files?.[0]) { const reader = new FileReader(); reader.onload = (ev) => setCover(ev.target?.result); reader.readAsDataURL(e.target.files[0]); } };
             const handleSubmit = async (e) => {
                 e.preventDefault(); if (!file || isPublishing || !user) return;
@@ -342,6 +431,15 @@
                     const audioRef = ref(storage, audioPath);
                     await uploadBytes(audioRef, file);
                     const audioUrl = await getDownloadURL(audioRef);
+
+                    let videoUrl = null;
+                    let videoPath = null;
+                    if (videoFile) {
+                        videoPath = `videos/${Date.now()}_${videoFile.name}`;
+                        const videoRef = ref(storage, videoPath);
+                        await uploadBytes(videoRef, videoFile);
+                        videoUrl = await getDownloadURL(videoRef);
+                    }
 
                     let coverUrl = "https://picsum.photos/seed/music/400/400";
                     let coverPath = null;
@@ -353,14 +451,19 @@
                         coverUrl = await getDownloadURL(coverStorageRef);
                     }
 
+                    const slug = await generateSlug(title || 'unnamed', 'songs');
+
                     const songData = {
                         title: title || 'Unnamed Track',
                         artist: artist || 'Anonymous',
                         genre: tags,
                         audioUrl,
                         audioPath,
+                        videoUrl,
+                        videoPath,
                         coverUrl,
                         coverPath,
+                        slug,
                         authorId: user.uid,
                         authorEmail: user.email,
                         createdAt: serverTimestamp(),
@@ -392,10 +495,21 @@
                                         <input id="cover-input" type="file" accept="image/*" className="hidden" onChange=${handleCoverChange} />
                                         ${cover ? h`<img src=${cover} className="w-full h-full object-cover" />` : h`<${ImageIcon} size=${32} className="text-gray-400" />`}
                                     </div>
-                                    <div className="flex-1 min-h-[144px] border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer" onClick=${() => !isPublishing && document.getElementById('file-input')?.click()}>
-                                        <input id="file-input" type="file" accept="audio/*" className="hidden" onChange=${handleFileChange} />
-                                        <${Upload} size=${40} className=${file ? 'text-green-500' : 'text-gray-400'} />
-                                        <p className="text-[11px] font-black mt-3 text-gray-500 uppercase tracking-[0.2em] truncate px-4">${file ? file.name : t.selectFile}</p>
+                                    <div className="flex-1 space-y-3">
+                                        <div className="h-[68px] border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer" onClick=${() => !isPublishing && document.getElementById('file-input')?.click()}>
+                                            <input id="file-input" type="file" accept="audio/*" className="hidden" onChange=${handleFileChange} />
+                                            <div className="flex items-center gap-3">
+                                                <${Music} size=${20} className=${file ? 'text-green-500' : 'text-gray-400'} />
+                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] truncate max-w-[150px]">${file ? file.name : t.selectFile}</p>
+                                            </div>
+                                        </div>
+                                        <div className="h-[68px] border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer" onClick=${() => !isPublishing && document.getElementById('video-input')?.click()}>
+                                            <input id="video-input" type="file" accept="video/*" className="hidden" onChange=${handleVideoChange} />
+                                            <div className="flex items-center gap-3">
+                                                <${Video} size=${20} className=${videoFile ? 'text-blue-500' : 'text-gray-400'} />
+                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] truncate max-w-[150px]">${videoFile ? videoFile.name : t.selectVideo}</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -418,7 +532,12 @@
             const [icon, setIcon] = useState(null);
             const [isPublic, setIsPublic] = useState(true);
             const handleIconChange = (e) => { if (e.target.files?.[0]) { const reader = new FileReader(); reader.onload = (ev) => setIcon(ev.target?.result); reader.readAsDataURL(e.target.files[0]); } };
-            const handleSubmit = (e) => { e.preventDefault(); if (!name.trim()) return; onCreate({ id: Date.now().toString(), name: name.trim(), icon: icon || undefined, isPublic, songs: [], createdAt: new Date().toISOString() }); };
+            const handleSubmit = async (e) => { 
+                e.preventDefault(); 
+                if (!name.trim()) return; 
+                const slug = await generateSlug(name.trim(), 'playlists');
+                onCreate({ id: Date.now().toString(), name: name.trim(), icon: icon || undefined, isPublic, slug, songs: [], createdAt: new Date().toISOString() }); 
+            };
 
             return h`
                 <div className="fixed inset-0 z-[250] bg-black/60 backdrop-blur-md flex items-center justify-center p-4">
@@ -582,6 +701,31 @@
             const t = translations[language];
 
             useEffect(() => {
+                const checkSlug = async () => {
+                    const path = window.location.pathname.substring(1);
+                    if (path && !['home', 'explore', 'library', 'search', 'favorites'].includes(path)) {
+                        // Check if it's a song slug
+                        const qSong = query(collection(db, 'songs'), where('slug', '==', path));
+                        const songSnap = await getDocs(qSong);
+                        if (!songSnap.empty) {
+                            const song = { id: songSnap.docs[0].id, ...songSnap.docs[0].data() };
+                            handlePlaySong(song);
+                            return;
+                        }
+
+                        // Check if it's a playlist slug
+                        const qPlaylist = query(collection(db, 'playlists'), where('slug', '==', path), where('isPublic', '==', true));
+                        const playlistSnap = await getDocs(qPlaylist);
+                        if (!playlistSnap.empty) {
+                            const playlist = { id: playlistSnap.docs[0].id, ...playlistSnap.docs[0].data() };
+                            setActiveTab(`playlist-${playlist.id}`);
+                        }
+                    }
+                };
+                if (db) checkSlug();
+            }, [db]);
+
+            useEffect(() => {
                 const unsubscribe = onAuthStateChanged(auth, (u) => { setUser(u); });
                 return () => unsubscribe();
             }, []);
@@ -663,6 +807,7 @@
                         name: playlistData.name,
                         icon: playlistData.icon || null,
                         isPublic: playlistData.isPublic,
+                        slug: playlistData.slug,
                         authorId: user.uid,
                         songIds: [],
                         createdAt: serverTimestamp()
@@ -736,6 +881,18 @@
                 </div>
             `;
 
+            const handleSharePlaylist = async (playlist) => {
+                const shareUrl = `${window.location.origin}/${playlist.slug || playlist.id}`;
+                if (navigator.share) {
+                    try {
+                        await navigator.share({ title: playlist.name, url: shareUrl });
+                    } catch (err) { console.error("Share failed:", err); }
+                } else {
+                    navigator.clipboard.writeText(shareUrl);
+                    alert(t.copied);
+                }
+            };
+
             const renderContent = () => {
                 if (activeTab.startsWith('playlist-')) {
                     const pId = activeTab.replace('playlist-', '');
@@ -748,8 +905,11 @@
                                 <div className=${`w-40 h-40 md:w-56 md:h-56 rounded-[40px] flex items-center justify-center ${theme === 'dark' ? 'bg-white/5' : 'bg-gray-100'}`}>
                                     ${p.icon ? h`<img src=${p.icon} className="w-full h-full object-cover rounded-[40px]" />` : h`<${ListMusic} size=${80} className="text-blue-500" />`}
                                 </div>
-                                <div className="text-center md:text-left space-y-2">
-                                    <button onClick=${() => setActiveTab('explore')} className="flex items-center gap-2 text-xs font-black text-blue-500 uppercase tracking-widest"><${ArrowLeft} size=${14} /> ${t.explore}</button>
+                                <div className="text-center md:text-left space-y-2 flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <button onClick=${() => setActiveTab('explore')} className="flex items-center gap-2 text-xs font-black text-blue-500 uppercase tracking-widest"><${ArrowLeft} size=${14} /> ${t.explore}</button>
+                                        <button onClick=${() => handleSharePlaylist(p)} className="p-3 bg-white/5 rounded-full hover:bg-white/10 transition-colors"><${Share2} size=${20} /></button>
+                                    </div>
                                     <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tight">${p.name}</h2>
                                     <p className="text-gray-500 font-bold uppercase tracking-widest text-xs">${playlistSongs.length} ТРЕКОВ</p>
                                 </div>
@@ -768,7 +928,7 @@
                     `;
                 }
                 if (activeTab === 'home') return h`<div className="space-y-10"><section><div className="flex items-center gap-2 mb-8"><${Sparkles} size=${20} className="text-blue-500" /><h2 className="text-lg md:text-2xl font-black uppercase tracking-tight">${t.newReleases}</h2></div>${globalMusic.length === 0 ? h`<div className="py-16 text-center border-2 border-dashed rounded-3xl"><p className="text-gray-400 font-bold">${t.beFirst}</p></div>` : renderSongsGrid(globalMusic)}</section></div>`;
-                if (activeTab === 'explore') return h`<div className="space-y-10"><section><h2 className="text-xl md:text-3xl font-black mb-8 uppercase tracking-tight">${t.playlists}</h2><div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${playlists.map(p => h`<div key=${p.id} onClick=${() => setActiveTab(`playlist-${p.id}`)} className=${`p-5 rounded-[40px] cursor-pointer transition-all border group ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:border-blue-500'}`}><div className="aspect-square rounded-3xl overflow-hidden mb-4 bg-black/20 flex items-center justify-center">${p.icon ? h`<img src=${p.icon} className="w-full h-full object-cover" />` : h`<${ListMusic} size=${40} className="text-blue-500" />`}</div><h3 className="font-bold text-lg truncate">${p.name}</h3><p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">${p.songIds.length} треков</p></div>`)}<button onClick=${() => setIsCreatePlaylistOpen(true)} className="p-5 rounded-[40px] border-2 border-dashed flex flex-col items-center justify-center gap-3"><${Plus} size=${32} /><span className="font-black text-xs uppercase tracking-widest">${t.createPlaylist}</span></button></div></section></div>`;
+                if (activeTab === 'explore') return h`<div className="space-y-10"><section><h2 className="text-xl md:text-3xl font-black mb-8 uppercase tracking-tight">${t.playlists}</h2><div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${playlists.map(p => h`<div key=${p.id} className=${`p-5 rounded-[40px] cursor-pointer transition-all border group relative ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:border-blue-500'}`} onClick=${() => setActiveTab(`playlist-${p.id}`)}><button onClick=${(e) => { e.stopPropagation(); handleSharePlaylist(p); }} className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"><${Share2} size=${16} /></button><div className="aspect-square rounded-3xl overflow-hidden mb-4 bg-black/20 flex items-center justify-center">${p.icon ? h`<img src=${p.icon} className="w-full h-full object-cover" />` : h`<${ListMusic} size=${40} className="text-blue-500" />`}</div><h3 className="font-bold text-lg truncate">${p.name}</h3><p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">${p.songIds.length} треков</p></div>`)}<button onClick=${() => setIsCreatePlaylistOpen(true)} className="p-5 rounded-[40px] border-2 border-dashed flex flex-col items-center justify-center gap-3"><${Plus} size=${32} /><span className="font-black text-xs uppercase tracking-widest">${t.createPlaylist}</span></button></div></section></div>`;
                 if (activeTab === 'library') {
                     const mySongs = globalMusic.filter(s => user && s.authorId === user.uid);
                     return h`
