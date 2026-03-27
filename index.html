@@ -31,7 +31,7 @@
         import * as Lucide from 'https://esm.sh/lucide-react';
 
         const h = htm.bind(React.createElement);
-        const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music, Heart, Trash2, LogOut, LogIn, AlertTriangle, MinusCircle, Share2, Video, Headphones } = Lucide;
+        const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music, Heart, Trash2, LogOut, LogIn, AlertTriangle, MinusCircle, Share2, Video, Headphones, Eye } = Lucide;
 
         // Global instances
         let db, auth, storage, ai;
@@ -86,10 +86,10 @@
 
         const translations = {
             en: {
-                home: 'Home', explore: 'Explore', library: 'Library', myMusic: 'My Music', searchPlaceholder: 'Search tracks...', settings: 'Settings', language: 'Language', upgrade: 'Upgrade', newReleases: 'Global Feed', quickPicks: 'Quick Picks', recommended: 'Recommendations', likedSongs: 'Liked Songs', selectLanguage: 'Select Language', resultsFor: 'Results for', searching: 'Searching...', rating: 'Rating', reviews: 'Reviews', writeReview: 'Write a review', submit: 'Post', theme: 'Theme', light: 'Light', dark: 'Dark', account: 'About Platform', privacy: 'Privacy', audioQuality: 'Audio Quality', upload: 'Publish Music', uploadDesc: 'Share your track with the world', selectFile: 'Select MP3/WAV', selectVideo: 'Select Video (Optional)', publish: 'Publish Track', preview: 'Cover Preview', beFirst: 'The world is quiet. Be the first to upload a track!', emptyLibrary: 'Your library is empty. Upload some music!', hashtags: 'Hashtags (comma separated)', createPlaylist: 'New Playlist', addToPlaylist: 'Add to playlist', playlists: 'Playlists', selectPlaylist: 'Select Playlist', playlistName: 'Playlist Name', playlistIcon: 'Playlist Icon', visibility: 'Visibility', public: 'Public', private: 'Private', create: 'Create', cancel: 'Cancel', noResults: 'No results found.', voiceSearchTitle: 'Voice Search', searchByMusic: 'Search by Music', listening: 'Listening...', analyzing: 'Analyzing music...', searchByVoice: 'Search by Voice', share: 'Share', audio: 'Audio', video: 'Video', song: 'Song', copied: 'Link copied to clipboard!'
+                home: 'Home', explore: 'Explore', library: 'Library', myMusic: 'My Music', searchPlaceholder: 'Search...', settings: 'Settings', language: 'Language', upgrade: 'Upgrade', newReleases: 'Global Feed', quickPicks: 'Quick Picks', recommended: 'Recommendations', likedSongs: 'Liked Songs', selectLanguage: 'Select Language', resultsFor: 'Results for', searching: 'Searching...', rating: 'Rating', reviews: 'Reviews', writeReview: 'Write a review', submit: 'Post', theme: 'Theme', light: 'Light', dark: 'Dark', account: 'About Platform', privacy: 'Privacy', audioQuality: 'Audio Quality', upload: 'Publish Content', uploadDesc: 'Share your creativity', selectFile: 'Select Audio', selectVideo: 'Select Video', selectPhoto: 'Select Photo', publish: 'Publish', preview: 'Preview', beFirst: 'The world is quiet. Be the first to upload!', emptyLibrary: 'Your library is empty!', hashtags: 'Hashtags', createPlaylist: 'New Playlist', addToPlaylist: 'Add to playlist', playlists: 'Playlists', selectPlaylist: 'Select Playlist', playlistName: 'Playlist Name', playlistIcon: 'Playlist Icon', visibility: 'Visibility', public: 'Public', private: 'Private', create: 'Create', cancel: 'Cancel', noResults: 'No results found.', voiceSearchTitle: 'Voice Search', searchByMusic: 'Search by Music', listening: 'Listening...', analyzing: 'Analyzing...', searchByVoice: 'Search by Voice', share: 'Share', audio: 'Audio', video: 'Video', photo: 'Photo', song: 'Song', copied: 'Link copied to clipboard!', type: 'Type', music: 'Music', videos: 'Videos', photos: 'Photos'
             },
             ru: {
-                home: 'Главная', explore: 'Обзор', library: 'Библиотека', myMusic: 'Моя музыка', searchPlaceholder: 'Поиск треков...', settings: 'Настройки', language: 'Язык', upgrade: 'Подписка', newReleases: 'Мировая лента', quickPicks: 'Быстрый выбор', recommended: 'Рекомендации', likedSongs: 'Любимые песни', selectLanguage: 'Выберите язык', resultsFor: 'Результаты для', searching: 'Поиск...', rating: 'Рейтинг', reviews: 'Отзывы', writeReview: 'Написать отзыв', submit: 'Опубликовать', theme: 'Тема', light: 'Светлая', dark: 'Темная', account: 'О платформе', privacy: 'Конфиденциальность', audioQuality: 'Качество звука', upload: 'Загрузить музыку', uploadDesc: 'Поделитесь треком со всем миром', selectFile: 'Выбрать аудио', selectVideo: 'Выбрать видео (опционально)', publish: 'Опубликовать трек', preview: 'Предпросмотр обложки', beFirst: 'В мире тишина. Станьте первым, кто загрузит трек!', emptyLibrary: 'Ваша библиотека пуста. Загрузите что-нибудь!', hashtags: 'Хэштеги (через запятую)', createPlaylist: 'Создать плейлист', addToPlaylist: 'Добавить в плейлист', playlists: 'Плейлисты', selectPlaylist: 'Выберите плейлист', playlistName: 'Название плейлиста', playlistIcon: 'Иконка плейлиста', visibility: 'Видимость', public: 'Публичный', private: 'Приватный', create: 'Создать', cancel: 'Отмена', noResults: 'Ничего не найдено.', voiceSearchTitle: 'Голосовой поиск', searchByMusic: 'Поиск по музыке', listening: 'Слушаю...', analyzing: 'Анализирую музыку...', searchByVoice: 'Искать голосом', share: 'Поделиться', audio: 'Аудио', video: 'Видео', song: 'Песня', copied: 'Ссылка скопирована!'
+                home: 'Главная', explore: 'Обзор', library: 'Библиотека', myMusic: 'Моя музыка', searchPlaceholder: 'Поиск...', settings: 'Настройки', language: 'Язык', upgrade: 'Подписка', newReleases: 'Мировая лента', quickPicks: 'Быстрый выбор', recommended: 'Рекомендации', likedSongs: 'Любимые песни', selectLanguage: 'Выберите язык', resultsFor: 'Результаты для', searching: 'Поиск...', rating: 'Рейтинг', reviews: 'Отзывы', writeReview: 'Написать отзыв', submit: 'Опубликовать', theme: 'Тема', light: 'Светлая', dark: 'Темная', account: 'О платформе', privacy: 'Конфиденциальность', audioQuality: 'Качество звука', upload: 'Опубликовать', uploadDesc: 'Поделитесь творчеством', selectFile: 'Выбрать аудио', selectVideo: 'Выбрать видео', selectPhoto: 'Выбрать фото', publish: 'Опубликовать', preview: 'Предпросмотр', beFirst: 'В мире тишина. Станьте первым!', emptyLibrary: 'Ваша библиотека пуста!', hashtags: 'Хэштеги', createPlaylist: 'Создать плейлист', addToPlaylist: 'Добавить в плейлист', playlists: 'Плейлисты', selectPlaylist: 'Выберите плейлист', playlistName: 'Название плейлиста', playlistIcon: 'Иконка плейлиста', visibility: 'Видимость', public: 'Публичный', private: 'Приватный', create: 'Создать', cancel: 'Отмена', noResults: 'Ничего не найдено.', voiceSearchTitle: 'Голосовой поиск', searchByMusic: 'Поиск по музыке', listening: 'Слушаю...', analyzing: 'Анализирую...', searchByVoice: 'Искать голосом', share: 'Поделиться', audio: 'Аудио', video: 'Видео', photo: 'Фото', song: 'Песня', copied: 'Ссылка скопирована!', type: 'Тип', music: 'Музыка', videos: 'Видео', photos: 'Фото'
             }
         };
 
@@ -242,20 +242,24 @@
 
             return h`
                 <div className=${`fixed bottom-20 md:bottom-0 left-0 right-0 z-[100] transition-all duration-300 ${isFullScreen ? 'fixed inset-0 h-screen bg-black flex flex-col items-center justify-center p-6' : `h-44 md:h-24 ${bgColor} backdrop-blur-2xl border-t ${borderColor} px-4 md:px-6 flex flex-col items-center justify-center md:flex-row md:justify-between`}`}>
-                    ${isFullScreen && h`<button onClick=${() => setIsFullScreen(false)} className="absolute top-8 right-8 text-white p-2 hover:bg-white/10 rounded-full transition-colors"><${Minimize2} size=${32} /></button>`}
-                    <div className=${`${isFullScreen ? 'w-[80%] max-w-2xl mb-8' : 'w-full md:absolute md:top-0 md:left-0 md:right-0 px-4 md:px-0 mb-2 md:mb-0'}`}>
-                        <div className="flex items-center gap-3 w-full group">
-                            <span className=${`text-[10px] font-bold ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} w-10 md:hidden`}>${formatTime(currentTime)}</span>
-                            <div className="relative flex-1 h-8 flex items-center">
-                                <input type="range" min="0" max=${duration || 100} step="0.1" value=${currentTime} onChange=${handleProgressChange} className="w-full h-1 md:h-1.5 rounded-full appearance-none cursor-pointer accent-blue-600 bg-gray-400/20 hover:bg-gray-400/40 transition-all" />
+                    ${isFullScreen && h`<button onClick=${() => setIsFullScreen(false)} className="absolute top-8 right-8 text-white p-2 hover:bg-white/10 rounded-full transition-colors z-[110]"><${Minimize2} size=${32} /></button>`}
+                    
+                    ${currentSong.type !== 'photo' && h`
+                        <div className=${`${isFullScreen ? 'w-[80%] max-w-2xl mb-8' : 'w-full md:absolute md:top-0 md:left-0 md:right-0 px-4 md:px-0 mb-2 md:mb-0'}`}>
+                            <div className="flex items-center gap-3 w-full group">
+                                <span className=${`text-[10px] font-bold ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} w-10 md:hidden`}>${formatTime(currentTime)}</span>
+                                <div className="relative flex-1 h-8 flex items-center">
+                                    <input type="range" min="0" max=${duration || 100} step="0.1" value=${currentTime} onChange=${handleProgressChange} className="w-full h-1 md:h-1.5 rounded-full appearance-none cursor-pointer accent-blue-600 bg-gray-400/20 hover:bg-gray-400/40 transition-all" />
+                                </div>
+                                <span className=${`text-[10px] font-bold ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} w-10 text-right md:hidden`}>${formatTime(duration)}</span>
                             </div>
-                            <span className=${`text-[10px] font-bold ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'} w-10 text-right md:hidden`}>${formatTime(duration)}</span>
                         </div>
-                    </div>
+                    `}
+
                     <div className=${`w-full flex items-center justify-between gap-2 md:gap-0 ${isFullScreen ? 'flex-col flex-1 justify-center' : ''}`}>
                         <div className=${`flex items-center gap-3 md:gap-4 ${isFullScreen ? 'flex-col mb-12' : 'hidden md:flex w-[25%] overflow-hidden'}`}>
                             <div className="relative group">
-                                <img src=${currentSong.coverUrl} className=${`rounded-lg md:rounded-2xl shadow-lg object-cover transition-all ${isFullScreen ? 'w-80 h-80' : 'w-16 h-16'}`} />
+                                <img src=${currentSong.coverUrl} className=${`rounded-lg md:rounded-2xl shadow-lg object-cover transition-all ${isFullScreen ? 'w-80 h-80 md:w-[500px] md:h-[500px]' : 'w-16 h-16'}`} />
                             </div>
                             <div className=${isFullScreen ? 'text-center mt-6 w-full flex flex-col items-center gap-2' : 'overflow-hidden flex-1'}>
                                 <div className=${`font-bold ${isFullScreen ? 'text-4xl text-white marquee-container' : `text-sm truncate ${textColor}`}`}>
@@ -264,29 +268,35 @@
                                 <div className=${`font-medium ${isFullScreen ? 'text-xl text-gray-400' : 'text-xs text-gray-500 truncate'}`}>${currentSong.artist}</div>
                             </div>
                         </div>
-                        <div className=${`flex flex-col items-center gap-1 md:gap-2 ${isFullScreen ? 'w-full' : 'flex-1 md:max-w-[45%]'}`}>
-                            ${currentSong.videoUrl && h`
-                                <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10 mb-1">
-                                    <button onClick=${() => setPlayerMode('audio')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.song}</button>
-                                    <button onClick=${() => setPlayerMode('video')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.video}</button>
+
+                        ${currentSong.type !== 'photo' && h`
+                            <div className=${`flex flex-col items-center gap-1 md:gap-2 ${isFullScreen ? 'w-full' : 'flex-1 md:max-w-[45%]'}`}>
+                                ${currentSong.videoUrl && h`
+                                    <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10 mb-1">
+                                        <button onClick=${() => setPlayerMode('audio')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.song}</button>
+                                        <button onClick=${() => setPlayerMode('video')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.video}</button>
+                                    </div>
+                                `}
+                                <div className="flex items-center justify-center gap-5 sm:gap-6 md:gap-8 w-full">
+                                    <button onClick=${onToggleShuffle} className=${`p-2 transition-all active:scale-75 ${isShuffle ? 'text-blue-500' : 'text-gray-400'}`}><${Shuffle} size=${isFullScreen ? 32 : 18} /></button>
+                                    <button onClick=${onBack} className=${`p-2 cursor-pointer transition-all active:scale-75 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}><${SkipBack} size=${isFullScreen ? 40 : 24} fill="currentColor" /></button>
+                                    <button onClick=${onTogglePlay} className=${`rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-2xl ${theme === 'dark' ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${isFullScreen ? 'w-24 h-24' : 'w-12 h-12 md:w-14 md:h-14'}`}>${isPlaying ? h`<${Pause} fill="currentColor" size=${isFullScreen ? 40 : 26} />` : h`<${Play} fill="currentColor" size=${isFullScreen ? 40 : 26} className="ml-1" />`}</button>
+                                    <button onClick=${onNext} className=${`p-2 cursor-pointer transition-all active:scale-75 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}><${SkipForward} size=${isFullScreen ? 40 : 24} fill="currentColor" /></button>
+                                    <button onClick=${onToggleRepeat} className=${`p-2 transition-all active:scale-75 ${repeatMode !== 'none' ? 'text-blue-500' : 'text-gray-400'}`}>${repeatMode === 'one' ? h`<${Repeat1} size=${isFullScreen ? 32 : 18} />` : h`<${Repeat} size=${isFullScreen ? 32 : 18} />`}</button>
                                 </div>
-                            `}
-                            <div className="flex items-center justify-center gap-5 sm:gap-6 md:gap-8 w-full">
-                                <button onClick=${onToggleShuffle} className=${`p-2 transition-all active:scale-75 ${isShuffle ? 'text-blue-500' : 'text-gray-400'}`}><${Shuffle} size=${isFullScreen ? 32 : 18} /></button>
-                                <button onClick=${onBack} className=${`p-2 cursor-pointer transition-all active:scale-75 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}><${SkipBack} size=${isFullScreen ? 40 : 24} fill="currentColor" /></button>
-                                <button onClick=${onTogglePlay} className=${`rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-90 shadow-2xl ${theme === 'dark' ? 'bg-white text-black' : 'bg-gray-900 text-white'} ${isFullScreen ? 'w-24 h-24' : 'w-12 h-12 md:w-14 md:h-14'}`}>${isPlaying ? h`<${Pause} fill="currentColor" size=${isFullScreen ? 40 : 26} />` : h`<${Play} fill="currentColor" size=${isFullScreen ? 40 : 26} className="ml-1" />`}</button>
-                                <button onClick=${onNext} className=${`p-2 cursor-pointer transition-all active:scale-75 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}><${SkipForward} size=${isFullScreen ? 40 : 24} fill="currentColor" /></button>
-                                <button onClick=${onToggleRepeat} className=${`p-2 transition-all active:scale-75 ${repeatMode !== 'none' ? 'text-blue-500' : 'text-gray-400'}`}>${repeatMode === 'one' ? h`<${Repeat1} size=${isFullScreen ? 32 : 18} />` : h`<${Repeat} size=${isFullScreen ? 32 : 18} />`}</button>
+                                <div className="hidden md:flex w-full items-center justify-center gap-3 text-[10px] font-bold text-gray-400"><span>${formatTime(currentTime)} / ${formatTime(duration)}</span></div>
                             </div>
-                            <div className="hidden md:flex w-full items-center justify-center gap-3 text-[10px] font-bold text-gray-400"><span>${formatTime(currentTime)} / ${formatTime(duration)}</span></div>
-                        </div>
+                        `}
+
                         <div className=${`flex items-center gap-2 md:gap-4 justify-end ${isFullScreen ? 'w-full mt-12 px-10' : 'w-[25%] md:w-[25%]'}`}>
                             <button onClick=${handleShare} className="text-gray-400 hover:text-blue-500 transition-colors p-2"><${Share2} size=${20} /></button>
                             <button onClick=${onDownload} className="text-gray-400 hover:text-green-500 transition-colors p-2"><${Download} size=${20} /></button>
-                            <div className="hidden sm:flex items-center gap-2 md:gap-3 flex-1 justify-end max-w-[140px]">
-                                <button onClick=${toggleMute} className="text-gray-400 hover:text-blue-500 transition-colors p-1">${isMuted || volume === 0 ? h`<${VolumeX} size=${20} />` : h`<${Volume2} size=${20} />`}</button>
-                                <input type="range" min="0" max="100" value=${volume} onChange=${handleVolumeChange} className=${`w-12 md:w-full h-1 rounded-full appearance-none cursor-pointer ${theme === 'dark' ? 'bg-white/10 accent-white' : 'bg-gray-200 accent-gray-900'}`} />
-                            </div>
+                            ${currentSong.type !== 'photo' && h`
+                                <div className="hidden sm:flex items-center gap-2 md:gap-3 flex-1 justify-end max-w-[140px]">
+                                    <button onClick=${toggleMute} className="text-gray-400 hover:text-blue-500 transition-colors p-1">${isMuted || volume === 0 ? h`<${VolumeX} size=${20} />` : h`<${Volume2} size=${20} />`}</button>
+                                    <input type="range" min="0" max="100" value=${volume} onChange=${handleVolumeChange} className=${`w-12 md:w-full h-1 rounded-full appearance-none cursor-pointer ${theme === 'dark' ? 'bg-white/10 accent-white' : 'bg-gray-200 accent-gray-900'}`} />
+                                </div>
+                            `}
                             ${!isFullScreen && h`<button onClick=${() => setIsFullScreen(true)} className="text-gray-400 hover:text-blue-500 transition-colors p-2"><${Maximize2} size=${20} /></button>`}
                         </div>
                     </div>
@@ -324,8 +334,11 @@
                         <img src=${song.coverUrl} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                         ${!song.isUserUploaded && h`<div className="absolute top-2 left-2 z-10 bg-blue-600/90 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Sparkles} size=${12} fill="white" /></div>`}
                         ${song.videoUrl && h`<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Video} size=${12} /></div>`}
+                        ${song.type === 'photo' && h`<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${ImageIcon} size=${12} /></div>`}
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg"><${Play} fill="white" size=${24} className="ml-1" /></div>
+                            <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                                ${song.type === 'photo' ? h`<${Eye} fill="white" size=${24} />` : h`<${Play} fill="white" size=${24} className="ml-1" />`}
+                            </div>
                         </div>
                     </div>
                     <div className="flex-1 min-w-0 md:mt-3 md:w-full">
@@ -412,57 +425,75 @@
         };
 
         const UploadModal = ({ t, theme, user, onClose, onUpload }) => {
+            const [type, setType] = useState('music'); // 'music', 'video', 'photo'
             const [file, setFile] = useState(null);
             const [videoFile, setVideoFile] = useState(null);
+            const [photoFile, setPhotoFile] = useState(null);
             const [cover, setCover] = useState(null);
             const [title, setTitle] = useState('');
             const [artist, setArtist] = useState('');
             const [tags, setTags] = useState('');
             const [isPublishing, setIsPublishing] = useState(false);
 
-            const handleFileChange = (e) => { if (e.target.files?.[0]) { setFile(e.target.files[0]); if (!title) setTitle(e.target.files[0].name.replace(/\.[^/.]+$/, "")); } };
-            const handleVideoChange = (e) => { if (e.target.files?.[0]) { setVideoFile(e.target.files[0]); } };
+            const handleFileChange = (e) => { 
+                if (e.target.files?.[0]) { 
+                    const f = e.target.files[0];
+                    if (type === 'music') setFile(f);
+                    else if (type === 'video') setVideoFile(f);
+                    else if (type === 'photo') setPhotoFile(f);
+                    
+                    if (!title) setTitle(f.name.replace(/\.[^/.]+$/, "")); 
+                } 
+            };
+            
             const handleCoverChange = (e) => { if (e.target.files?.[0]) { const reader = new FileReader(); reader.onload = (ev) => setCover(ev.target?.result); reader.readAsDataURL(e.target.files[0]); } };
+            
             const handleSubmit = async (e) => {
-                e.preventDefault(); if (!file || isPublishing || !user) return;
+                e.preventDefault(); 
+                const mainFile = type === 'music' ? file : (type === 'video' ? videoFile : photoFile);
+                if (!mainFile || isPublishing || !user) return;
+                
                 setIsPublishing(true);
                 try {
-                    const audioPath = `audio/${Date.now()}_${file.name}`;
-                    const audioRef = ref(storage, audioPath);
-                    await uploadBytes(audioRef, file);
-                    const audioUrl = await getDownloadURL(audioRef);
-
-                    let videoUrl = null;
-                    let videoPath = null;
-                    if (videoFile) {
-                        videoPath = `videos/${Date.now()}_${videoFile.name}`;
-                        const videoRef = ref(storage, videoPath);
-                        await uploadBytes(videoRef, videoFile);
-                        videoUrl = await getDownloadURL(videoRef);
-                    }
-
+                    let audioUrl = null, audioPath = null;
+                    let videoUrl = null, videoPath = null;
+                    let photoUrl = null, photoPath = null;
                     let coverUrl = "https://picsum.photos/seed/music/400/400";
                     let coverPath = null;
+
+                    // Upload main file
+                    const timestamp = Date.now();
+                    const mainPath = `${type}/${timestamp}_${mainFile.name}`;
+                    const mainRef = ref(storage, mainPath);
+                    await uploadBytes(mainRef, mainFile);
+                    const mainUrl = await getDownloadURL(mainRef);
+
+                    if (type === 'music') { audioUrl = mainUrl; audioPath = mainPath; }
+                    else if (type === 'video') { videoUrl = mainUrl; videoPath = mainPath; }
+                    else if (type === 'photo') { photoUrl = mainUrl; photoPath = mainPath; coverUrl = mainUrl; }
+
+                    // Upload optional cover for music/video
                     const coverInput = e.currentTarget.querySelector('#cover-input')?.files?.[0];
-                    if (coverInput) {
-                        coverPath = `covers/${Date.now()}_${coverInput.name}`;
+                    if (coverInput && type !== 'photo') {
+                        coverPath = `covers/${timestamp}_${coverInput.name}`;
                         const coverStorageRef = ref(storage, coverPath);
                         await uploadBytes(coverStorageRef, coverInput);
                         coverUrl = await getDownloadURL(coverStorageRef);
+                    } else if (type === 'video' && !coverInput) {
+                        coverUrl = "https://picsum.photos/seed/video/400/400";
                     }
 
                     const slug = await generateSlug(title || 'unnamed', 'songs');
 
                     const songData = {
-                        title: title || 'Unnamed Track',
-                        artist: artist || 'Anonymous',
+                        type,
+                        title: title || 'Unnamed',
+                        artist: artist || user.displayName || 'Anonymous',
                         genre: tags,
-                        audioUrl,
-                        audioPath,
-                        videoUrl,
-                        videoPath,
-                        coverUrl,
-                        coverPath,
+                        audioUrl, audioPath,
+                        videoUrl, videoPath,
+                        photoUrl, photoPath,
+                        coverUrl, coverPath,
                         slug,
                         authorId: user.uid,
                         authorEmail: user.email,
@@ -489,34 +520,40 @@
                                 <h2 className="text-xl md:text-3xl font-black uppercase tracking-tight">${t.publish}</h2>
                                 ${!isPublishing && h`<button onClick=${onClose} className="p-2 rounded-full bg-white/5"><${X} size=${24} /></button>`}
                             </div>
+
+                            <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5">
+                                ${['music', 'video', 'photo'].map(t_id => h`
+                                    <button key=${t_id} onClick=${() => setType(t_id)} className=${`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${type === t_id ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-white'}`}>
+                                        ${t[t_id]}
+                                    </button>
+                                `)}
+                            </div>
+
                             <form onSubmit=${handleSubmit} className="space-y-6">
                                 <div className="flex flex-col sm:flex-row gap-6">
-                                    <div className="w-full sm:w-36 h-36 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden cursor-pointer" onClick=${() => !isPublishing && document.getElementById('cover-input')?.click()}>
-                                        <input id="cover-input" type="file" accept="image/*" className="hidden" onChange=${handleCoverChange} />
-                                        ${cover ? h`<img src=${cover} className="w-full h-full object-cover" />` : h`<${ImageIcon} size=${32} className="text-gray-400" />`}
-                                    </div>
-                                    <div className="flex-1 space-y-3">
-                                        <div className="h-[68px] border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer" onClick=${() => !isPublishing && document.getElementById('file-input')?.click()}>
-                                            <input id="file-input" type="file" accept="audio/*" className="hidden" onChange=${handleFileChange} />
-                                            <div className="flex items-center gap-3">
-                                                <${Music} size=${20} className=${file ? 'text-green-500' : 'text-gray-400'} />
-                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] truncate max-w-[150px]">${file ? file.name : t.selectFile}</p>
-                                            </div>
+                                    ${type !== 'photo' && h`
+                                        <div className="w-full sm:w-36 h-36 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center relative overflow-hidden cursor-pointer" onClick=${() => !isPublishing && document.getElementById('cover-input')?.click()}>
+                                            <input id="cover-input" type="file" accept="image/*" className="hidden" onChange=${handleCoverChange} />
+                                            ${cover ? h`<img src=${cover} className="w-full h-full object-cover" />` : h`<div className="text-center p-2"><${ImageIcon} size=${32} className="text-gray-400 mx-auto" /><p className="text-[8px] mt-2 text-gray-500 font-bold uppercase tracking-widest">Cover</p></div>`}
                                         </div>
-                                        <div className="h-[68px] border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer" onClick=${() => !isPublishing && document.getElementById('video-input')?.click()}>
-                                            <input id="video-input" type="file" accept="video/*" className="hidden" onChange=${handleVideoChange} />
-                                            <div className="flex items-center gap-3">
-                                                <${Video} size=${20} className=${videoFile ? 'text-blue-500' : 'text-gray-400'} />
-                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] truncate max-w-[150px]">${videoFile ? videoFile.name : t.selectVideo}</p>
+                                    `}
+                                    <div className="flex-1 space-y-3">
+                                        <div className="h-[100px] border-2 border-dashed rounded-3xl flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-colors" onClick=${() => !isPublishing && document.getElementById('file-input')?.click()}>
+                                            <input id="file-input" type="file" accept=${type === 'music' ? 'audio/*' : (type === 'video' ? 'video/*' : 'image/*')} className="hidden" onChange=${handleFileChange} />
+                                            <div className="flex flex-col items-center gap-2">
+                                                ${type === 'music' ? h`<${Music} size=${24} className=${file ? 'text-green-500' : 'text-gray-400'} />` : (type === 'video' ? h`<${Video} size=${24} className=${videoFile ? 'text-blue-500' : 'text-gray-400'} />` : h`<${ImageIcon} size=${24} className=${photoFile ? 'text-purple-500' : 'text-gray-400'} />`)}
+                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] truncate max-w-[200px]">
+                                                    ${type === 'music' ? (file ? file.name : t.selectFile) : (type === 'video' ? (videoFile ? videoFile.name : t.selectVideo) : (photoFile ? photoFile.name : t.selectPhoto))}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <input type="text" placeholder="Song Title" value=${title} onChange=${e => setTitle(e.target.value)} className=${`p-5 rounded-2xl border-2 outline-none font-bold ${theme === 'dark' ? 'bg-black border-white/5 text-white' : 'bg-gray-50 border-gray-100'}`} />
-                                    <input type="text" placeholder="Artist Name" value=${artist} onChange=${e => setArtist(e.target.value)} className=${`p-5 rounded-2xl border-2 outline-none font-bold ${theme === 'dark' ? 'bg-black border-white/5 text-white' : 'bg-gray-50 border-gray-100'}`} />
+                                    <input type="text" placeholder="Title" value=${title} onChange=${e => setTitle(e.target.value)} className=${`p-5 rounded-2xl border-2 outline-none font-bold ${theme === 'dark' ? 'bg-black border-white/5 text-white' : 'bg-gray-50 border-gray-100'}`} />
+                                    <input type="text" placeholder="Artist/Author" value=${artist} onChange=${e => setArtist(e.target.value)} className=${`p-5 rounded-2xl border-2 outline-none font-bold ${theme === 'dark' ? 'bg-black border-white/5 text-white' : 'bg-gray-50 border-gray-100'}`} />
                                 </div>
-                                <button type="submit" disabled=${!file || isPublishing} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-xl flex items-center justify-center gap-4 text-lg">
+                                <button type="submit" disabled=${isPublishing} className="w-full py-5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-xl flex items-center justify-center gap-4 text-lg">
                                     ${isPublishing ? h`<${Loader2} className="animate-spin" size=${24} />` : h`<${Check} size=${24} strokeWidth=${4} />`}
                                     <span className="tracking-widest uppercase">${isPublishing ? 'PUBLISHING...' : t.publish}</span>
                                 </button>
@@ -851,8 +888,28 @@
             };
 
             const handlePlaySong = (song) => {
-                if (currentSong?.id === song.id) { if (isPlaying) audioRef.current.pause(); else audioRef.current.play(); setIsPlaying(!isPlaying); }
-                else { setCurrentSong(song); setIsPlaying(true); if (audioRef.current) { audioRef.current.src = song.audioUrl; audioRef.current.play(); } }
+                if (song.type === 'photo') {
+                    setCurrentSong(song);
+                    setIsPlaying(false);
+                    if (audioRef.current) audioRef.current.src = '';
+                    setIsFullScreen(true);
+                    return;
+                }
+                if (currentSong?.id === song.id && currentSong.type !== 'photo') { 
+                    if (isPlaying) audioRef.current.pause(); 
+                    else audioRef.current.play().catch(e => console.error("Play failed:", e)); 
+                    setIsPlaying(!isPlaying); 
+                }
+                else { 
+                    setCurrentSong(song); 
+                    setIsPlaying(true); 
+                    if (audioRef.current) { 
+                        audioRef.current.src = song.audioUrl || ''; 
+                        if (song.audioUrl) audioRef.current.play().catch(e => console.error("Play failed:", e)); 
+                    } 
+                    if (song.type === 'video') setPlayerMode('video');
+                    else setPlayerMode('audio');
+                }
             };
 
             const handleDownload = (song) => { const a = document.createElement('a'); a.href = song.audioUrl; a.download = `${song.artist} - ${song.title}.mp3`; a.click(); };
@@ -893,6 +950,8 @@
                 }
             };
 
+            const [feedType, setFeedType] = useState('music'); // 'music', 'video', 'photo'
+
             const renderContent = () => {
                 if (activeTab.startsWith('playlist-')) {
                     const pId = activeTab.replace('playlist-', '');
@@ -927,7 +986,33 @@
                         </div>
                     `;
                 }
-                if (activeTab === 'home') return h`<div className="space-y-10"><section><div className="flex items-center gap-2 mb-8"><${Sparkles} size=${20} className="text-blue-500" /><h2 className="text-lg md:text-2xl font-black uppercase tracking-tight">${t.newReleases}</h2></div>${globalMusic.length === 0 ? h`<div className="py-16 text-center border-2 border-dashed rounded-3xl"><p className="text-gray-400 font-bold">${t.beFirst}</p></div>` : renderSongsGrid(globalMusic)}</section></div>`;
+                if (activeTab === 'home') {
+                    const filteredMusic = globalMusic.filter(s => {
+                        if (feedType === 'music') return s.type === 'music' || !s.type;
+                        if (feedType === 'video') return s.type === 'video';
+                        if (feedType === 'photo') return s.type === 'photo';
+                        return true;
+                    });
+
+                    return h`
+                        <div className="space-y-10">
+                            <div className="flex bg-white/5 p-1 rounded-2xl border border-white/5 max-w-md mx-auto md:mx-0">
+                                ${['music', 'video', 'photo'].map(f_id => h`
+                                    <button key=${f_id} onClick=${() => setFeedType(f_id)} className=${`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${feedType === f_id ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-white'}`}>
+                                        ${t[f_id === 'music' ? 'music' : (f_id === 'video' ? 'videos' : 'photos')]}
+                                    </button>
+                                `)}
+                            </div>
+                            <section>
+                                <div className="flex items-center gap-2 mb-8">
+                                    <${Sparkles} size=${20} className="text-blue-500" />
+                                    <h2 className="text-lg md:text-2xl font-black uppercase tracking-tight">${t.newReleases}</h2>
+                                </div>
+                                ${filteredMusic.length === 0 ? h`<div className="py-16 text-center border-2 border-dashed rounded-3xl"><p className="text-gray-400 font-bold">${t.beFirst}</p></div>` : renderSongsGrid(filteredMusic)}
+                            </section>
+                        </div>
+                    `;
+                }
                 if (activeTab === 'explore') return h`<div className="space-y-10"><section><h2 className="text-xl md:text-3xl font-black mb-8 uppercase tracking-tight">${t.playlists}</h2><div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${playlists.map(p => h`<div key=${p.id} className=${`p-5 rounded-[40px] cursor-pointer transition-all border group relative ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:border-blue-500'}`} onClick=${() => setActiveTab(`playlist-${p.id}`)}><button onClick=${(e) => { e.stopPropagation(); handleSharePlaylist(p); }} className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"><${Share2} size=${16} /></button><div className="aspect-square rounded-3xl overflow-hidden mb-4 bg-black/20 flex items-center justify-center">${p.icon ? h`<img src=${p.icon} className="w-full h-full object-cover" />` : h`<${ListMusic} size=${40} className="text-blue-500" />`}</div><h3 className="font-bold text-lg truncate">${p.name}</h3><p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">${p.songIds.length} треков</p></div>`)}<button onClick=${() => setIsCreatePlaylistOpen(true)} className="p-5 rounded-[40px] border-2 border-dashed flex flex-col items-center justify-center gap-3"><${Plus} size=${32} /><span className="font-black text-xs uppercase tracking-widest">${t.createPlaylist}</span></button></div></section></div>`;
                 if (activeTab === 'library') {
                     const mySongs = globalMusic.filter(s => user && s.authorId === user.uid);
@@ -1029,24 +1114,18 @@
                     await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
                         // If it's just a permission error or not found, it means the service IS available
                         if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                        // If it's a "database not found" error, we should try the default one if we were using a named one
-                        if (err.message.includes('not found') && useNamed) throw err;
-                        // For other errors (offline, etc), we might want to show the error
-                        if (err.message.includes('not available') || err.message.includes('offline')) throw err;
+                        // If it's a "database not found" error or "service not available", we should try the default one
+                        if (err.message.includes('not found') || err.message.includes('not available') || err.message.includes('offline')) throw err;
                     });
                 } catch (e) {
-                    console.warn("Database initialization failed, trying fallback...", e.message);
+                    console.warn("Database initialization failed, trying fallback to (default)...", e.message);
                     try {
                         // Fallback to default if named failed
-                        if (useNamed) {
-                            db = getFirestore(app);
-                            await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                                if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                                throw err;
-                            });
-                        } else {
-                            throw e;
-                        }
+                        db = getFirestore(app);
+                        await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
+                            if (err.code === 'permission-denied' || err.code === 'not-found') return;
+                            throw err;
+                        });
                     } catch (e2) {
                         const isVercel = window.location.hostname.includes('vercel.app');
                         const errorMsg = e2.message || String(e2);
