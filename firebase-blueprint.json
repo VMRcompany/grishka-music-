@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "Song": {
+      "title": "Song",
+      "description": "A music track, video, or photo uploaded to the platform.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "The title of the content." },
+        "artist": { "type": "string", "description": "The artist name." },
+        "genre": { "type": "string", "description": "The genre or tags." },
+        "audioUrl": { "type": "string", "format": "uri", "description": "URL to the audio file in Storage (optional)." },
+        "videoUrl": { "type": "string", "format": "uri", "description": "URL to the video file in Storage (optional)." },
+        "photoUrl": { "type": "string", "format": "uri", "description": "URL to the photo file in Storage (optional)." },
+        "coverUrl": { "type": "string", "format": "uri", "description": "URL to the cover image in Storage." },
+        "type": { "type": "string", "enum": ["music", "video", "photo"], "description": "The type of content." },
+        "slug": { "type": "string", "description": "Unique URL-friendly name for sharing." },
+        "authorId": { "type": "string", "description": "UID of the user who uploaded the content." },
+        "authorEmail": { "type": "string", "format": "email", "description": "Email of the user who uploaded the content." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the content was created." },
+        "favoritesCount": { "type": "integer", "description": "Number of times the content has been favorited." },
+        "isUserUploaded": { "type": "boolean", "description": "Whether the content was uploaded by a user." }
+      },
+      "required": ["title", "artist", "coverUrl", "authorId", "createdAt", "slug", "type"]
+    },
+    "Playlist": {
+      "title": "Playlist",
+      "description": "A collection of songs created by a user.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The name of the playlist." },
+        "icon": { "type": "string", "format": "uri", "description": "URL to the playlist icon image." },
+        "isPublic": { "type": "boolean", "description": "Whether the playlist is visible to everyone." },
+        "slug": { "type": "string", "description": "Unique URL-friendly name for sharing." },
+        "authorId": { "type": "string", "description": "UID of the user who created the playlist." },
+        "songIds": { "type": "array", "items": { "type": "string" }, "description": "List of song document IDs in the playlist." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the playlist was created." }
+      },
+      "required": ["name", "authorId", "songIds", "createdAt", "slug"]
+    },
+    "Favorite": {
+      "title": "Favorite",
+      "description": "A record of a user favoriting a song.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the user who favorited the song." },
+        "songId": { "type": "string", "description": "ID of the song that was favorited." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Timestamp when the favorite was created." }
+      },
+      "required": ["userId", "songId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "songs": {
+      "schema": "Song",
+      "description": "Collection of all music tracks."
+    },
+    "playlists": {
+      "schema": "Playlist",
+      "description": "Collection of user-created playlists."
+    },
+    "favorites": {
+      "schema": "Favorite",
+      "description": "Collection of user favorites (doc ID is userId_songId)."
+    }
+  }
+}
