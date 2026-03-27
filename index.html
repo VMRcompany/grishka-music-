@@ -42,7 +42,7 @@
             appId: "1:1028257117288:web:c4b079e2ccf1becbc177dd",
             apiKey: "AIzaSyC-Ot04UT6IYPH9M0kS54srXu6eI9UgmqQ",
             authDomain: "gen-lang-client-0020876863.firebaseapp.com",
-            firestoreDatabaseId: "(default)",
+            firestoreDatabaseId: "ai-studio-7b42d141-d638-4b3d-b484-a7c1c0a5bcbc",
             storageBucket: "gen-lang-client-0020876863.firebasestorage.app",
             messagingSenderId: "1028257117288",
             measurementId: ""
@@ -1018,29 +1018,41 @@
 
                 try {
                     if (useNamed) {
+                        console.log(`Using named database: ${firebaseConfig.firestoreDatabaseId}`);
                         db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-                        // Probe check to verify service availability
-                        await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                            // If it's just a permission error, it means the service IS available
-                            if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                            if (err.message.includes('not available') || err.message.includes('not found') || err.message.includes('offline')) throw err;
-                        });
                     } else {
-                        throw new Error("No named database");
-                    }
-                } catch (e) {
-                    console.warn("Named database failed, trying default...", e.message);
-                    try {
+                        console.log("Using default database");
                         db = getFirestore(app);
-                        await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                            if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                            if (err.message.includes('not available') || err.message.includes('offline')) throw err;
-                        });
+                    }
+                    
+                    // Probe check to verify service availability
+                    await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
+                        // If it's just a permission error or not found, it means the service IS available
+                        if (err.code === 'permission-denied' || err.code === 'not-found') return;
+                        // If it's a "database not found" error, we should try the default one if we were using a named one
+                        if (err.message.includes('not found') && useNamed) throw err;
+                        // For other errors (offline, etc), we might want to show the error
+                        if (err.message.includes('not available') || err.message.includes('offline')) throw err;
+                    });
+                } catch (e) {
+                    console.warn("Database initialization failed, trying fallback...", e.message);
+                    try {
+                        // Fallback to default if named failed
+                        if (useNamed) {
+                            db = getFirestore(app);
+                            await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
+                                if (err.code === 'permission-denied' || err.code === 'not-found') return;
+                                throw err;
+                            });
+                        } else {
+                            throw e;
+                        }
                     } catch (e2) {
                         const isVercel = window.location.hostname.includes('vercel.app');
+                        const errorMsg = e2.message || String(e2);
                         renderError(
                             "Firestore недоступен",
-                            "Сервис Firestore не активирован или проект не настроен для этого домена.",
+                            `Ошибка: ${errorMsg}`,
                             [
                                 h`Перейдите в <a href="${consoleUrl}" target="_blank" class="text-blue-500 underline font-black">Firebase Console -> Firestore</a> и нажмите <b>"Create Database"</b>.`,
                                 h`Убедитесь, что ID базы данных (<b>${firebaseConfig.firestoreDatabaseId}</b>) создан в консоли. Если нет — создайте базу с таким ID или используйте "(default)".`,
