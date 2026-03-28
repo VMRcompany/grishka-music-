@@ -1,0 +1,12 @@
+{
+  "name": "grishka-music",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx -y serve -p 3000 .",
+    "build": "mkdir -p dist && cp index.html dist/",
+    "start": "npx -y serve -p 3000 .",
+    "lint": "echo 'No linting needed for standalone HTML app' && exit 0"
+  },
+  "type": "module"
+}
