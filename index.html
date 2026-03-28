@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Гришка Music</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #030303; color: #ffffff; margin: 0; }
@@ -19,13 +20,9 @@
 <body>
     <div id="root"></div>
     <script type="module">
-        // Version: 1.0.1 - Standalone Firebase Config
+        // Version: 1.1.0 - Supabase Migration
         import React, { useState, useEffect, useCallback, useRef, useMemo } from 'https://esm.sh/react@19';
         import ReactDOM from 'https://esm.sh/react-dom@19/client';
-        import { initializeApp } from 'https://esm.sh/firebase@11.4.0/app';
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from 'https://esm.sh/firebase@11.4.0/auth';
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, where, getDocs, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc, runTransaction, serverTimestamp, increment } from 'https://esm.sh/firebase@11.4.0/firestore';
-        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://esm.sh/firebase@11.4.0/storage';
         import { GoogleGenAI, Type } from 'https://esm.sh/@google/genai';
         import htm from 'https://esm.sh/htm';
         import * as Lucide from 'https://esm.sh/lucide-react';
@@ -34,53 +31,25 @@
         const { Home, Compass, Library, Plus, ListMusic, Search, Settings: SettingsIcon, Moon, Sun, Mic, Play, Pause, SkipBack, SkipForward, Volume2, VolumeX, Maximize2, Minimize2, Repeat, Repeat1, Shuffle, Download, PlusCircle, MoreVertical, Sparkles, X, Globe, Lock, Check, ImageIcon, Loader2, Hash, AlertCircle, SearchX, ArrowLeft, Info, Music, Heart, Trash2, LogOut, LogIn, AlertTriangle, MinusCircle, Share2, Video, Headphones, Eye } = Lucide;
 
         // Global instances
-        let db, auth, storage, ai;
+        let supabase, ai;
 
-        // Embedded configuration for standalone operation
-        const firebaseConfig = {
-            projectId: "gen-lang-client-0020876863",
-            appId: "1:1028257117288:web:c4b079e2ccf1becbc177dd",
-            apiKey: "AIzaSyC-Ot04UT6IYPH9M0kS54srXu6eI9UgmqQ",
-            authDomain: "gen-lang-client-0020876863.firebaseapp.com",
-            firestoreDatabaseId: "ai-studio-7b42d141-d638-4b3d-b484-a7c1c0a5bcbc",
-            storageBucket: "gen-lang-client-0020876863.firebasestorage.app",
-            messagingSenderId: "1028257117288",
-            measurementId: ""
-        };
+        // --- SUPABASE CONFIGURATION ---
+        // Replace these with your Supabase Project URL and Anon Key
+        const SUPABASE_URL = 'https://pejkudofyqzymeoefmg.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'sb_publishable_jQspgHwEDzUFv7ba7LlKfQ_yzKds';
 
-        // --- Initialization ---
+        if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
 
-        const OperationType = {
-            CREATE: 'create',
-            UPDATE: 'update',
-            DELETE: 'delete',
-            LIST: 'list',
-            GET: 'get',
-            WRITE: 'write',
-        };
-
-        const handleFirestoreError = (error, operationType, path) => {
-            if (!auth) return { error: 'Auth not initialized' };
+        const handleSupabaseError = (error, operationType, path) => {
             const errInfo = {
-                error: error instanceof Error ? error.message : String(error),
-                authInfo: {
-                    userId: auth.currentUser?.uid,
-                    email: auth.currentUser?.email,
-                    emailVerified: auth.currentUser?.emailVerified,
-                    isAnonymous: auth.currentUser?.isAnonymous,
-                    tenantId: auth.currentUser?.tenantId,
-                    providerInfo: auth.currentUser?.providerData.map(provider => ({
-                        providerId: provider.providerId,
-                        displayName: provider.displayName,
-                        email: provider.email,
-                        photoUrl: provider.photoURL
-                    })) || []
-                },
+                error: error?.message || String(error),
                 operationType,
-                path
+                path,
+                timestamp: new Date().toISOString()
             };
-            console.error('Firestore Error: ', JSON.stringify(errInfo));
-            // We can show a toast or alert here if needed
+            console.error('Supabase Error: ', JSON.stringify(errInfo));
             return errInfo;
         };
 
@@ -174,7 +143,7 @@
                         </button>
                         ${user ? h`
                             <div className="flex items-center gap-2">
-                                <img src=${user.photoURL} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-blue-600" />
+                                <img src=${user.user_metadata?.avatar_url || user.user_metadata?.picture || 'https://picsum.photos/seed/user/100/100'} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-blue-600" />
                                 <button onClick=${onLogout} className=${`p-2 rounded-full hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-all hidden md:block`}><${LogOut} size=${20} /></button>
                             </div>
                         ` : h`
@@ -201,7 +170,7 @@
                 if (!audio) return;
                 const updateProgress = () => { 
                     setCurrentTime(audio.currentTime); 
-                    setDuration(audio.duration || currentSong?.durationSec || 0); 
+                    setDuration(audio.duration || currentSong?.duration_sec || 0); 
                     if (videoRef.current) videoRef.current.currentTime = audio.currentTime;
                 };
                 audio.addEventListener('timeupdate', updateProgress);
@@ -259,7 +228,7 @@
                     <div className=${`w-full flex items-center justify-between gap-2 md:gap-0 ${isFullScreen ? 'flex-col flex-1 justify-center' : ''}`}>
                         <div className=${`flex items-center gap-3 md:gap-4 ${isFullScreen ? 'flex-col mb-12' : 'hidden md:flex w-[25%] overflow-hidden'}`}>
                             <div className="relative group">
-                                <img src=${currentSong.coverUrl} className=${`rounded-lg md:rounded-2xl shadow-lg object-cover transition-all ${isFullScreen ? 'w-80 h-80 md:w-[500px] md:h-[500px]' : 'w-16 h-16'}`} />
+                                <img src=${currentSong.cover_url} className=${`rounded-lg md:rounded-2xl shadow-lg object-cover transition-all ${isFullScreen ? 'w-80 h-80 md:w-[500px] md:h-[500px]' : 'w-16 h-16'}`} />
                             </div>
                             <div className=${isFullScreen ? 'text-center mt-6 w-full flex flex-col items-center gap-2' : 'overflow-hidden flex-1'}>
                                 <div className=${`font-bold ${isFullScreen ? 'text-4xl text-white marquee-container' : `text-sm truncate ${textColor}`}`}>
@@ -271,7 +240,7 @@
 
                         ${currentSong.type !== 'photo' && h`
                             <div className=${`flex flex-col items-center gap-1 md:gap-2 ${isFullScreen ? 'w-full' : 'flex-1 md:max-w-[45%]'}`}>
-                                ${currentSong.videoUrl && h`
+                                ${currentSong.video_url && h`
                                     <div className="flex bg-white/5 backdrop-blur-md rounded-full p-1 border border-white/10 mb-1">
                                         <button onClick=${() => setPlayerMode('audio')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.song}</button>
                                         <button onClick=${() => setPlayerMode('video')} className=${`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}>${t.video}</button>
@@ -301,9 +270,9 @@
                         </div>
                     </div>
 
-                    ${playerMode === 'video' && currentSong.videoUrl && h`
+                    ${playerMode === 'video' && currentSong.video_url && h`
                         <div className=${`fixed inset-0 z-[-1] bg-black flex items-center justify-center overflow-hidden ${isFullScreen ? 'opacity-100' : 'opacity-40'}`}>
-                            <video ref=${videoRef} src=${currentSong.videoUrl} className="w-full h-full object-contain" playsInline muted />
+                            <video ref=${videoRef} src=${currentSong.video_url} className="w-full h-full object-contain" playsInline muted />
                             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/40 pointer-events-none" />
                         </div>
                     `}
@@ -312,7 +281,7 @@
         };
 
         const MusicCard = ({ song, onPlay, onDownload, onAddToPlaylist, onToggleFavorite, onDelete, onRemoveFromPlaylist, isFavorite, user, theme, isInPlaylist }) => {
-            const isOwner = user && song.authorId === user.uid;
+            const isOwner = user && song.author_id === user.id;
             const t = translations[getCookie('gm_lang') || 'ru'];
 
             const handleShare = async (e) => {
@@ -331,9 +300,9 @@
             return h`
                 <div className=${`group transition-all duration-200 relative flex items-center md:flex-col md:items-start gap-3 md:gap-0 p-2 md:p-3 rounded-xl md:rounded-[24px] ${theme === 'dark' ? 'bg-transparent hover:bg-white/5' : 'bg-transparent hover:bg-gray-100'}`}>
                     <div className="relative w-14 h-14 md:w-full md:aspect-square shrink-0 cursor-pointer overflow-hidden rounded-lg md:rounded-[20px] shadow-sm" onClick=${() => onPlay(song)}>
-                        <img src=${song.coverUrl} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                        ${!song.isUserUploaded && h`<div className="absolute top-2 left-2 z-10 bg-blue-600/90 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Sparkles} size=${12} fill="white" /></div>`}
-                        ${song.videoUrl && h`<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Video} size=${12} /></div>`}
+                        <img src=${song.cover_url} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                        ${!song.is_user_uploaded && h`<div className="absolute top-2 left-2 z-10 bg-blue-600/90 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Sparkles} size=${12} fill="white" /></div>`}
+                        ${song.video_url && h`<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${Video} size=${12} /></div>`}
                         ${song.type === 'photo' && h`<div className="absolute top-2 right-2 z-10 bg-black/60 backdrop-blur-md text-white p-1 rounded-lg shadow-lg"><${ImageIcon} size=${12} /></div>`}
                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <div className="w-8 h-8 md:w-12 md:h-12 bg-blue-600 rounded-full flex items-center justify-center shadow-lg">
@@ -351,7 +320,7 @@
                                 <button onClick=${handleShare} className="p-1.5 rounded-full transition-all hover:bg-blue-500/10 text-gray-400 hover:text-blue-500"><${Share2} size=${18} /></button>
                                 <button onClick=${(e) => { e.stopPropagation(); onToggleFavorite(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-red-500/10 ${isFavorite ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}>
                                     <${Heart} size=${18} fill=${isFavorite ? "currentColor" : "none"} />
-                                    ${song.favoritesCount > 0 && h`<span className="text-[10px] ml-0.5 font-bold">${song.favoritesCount}</span>`}
+                                    ${song.favorites_count > 0 && h`<span className="text-[10px] ml-0.5 font-bold">${song.favorites_count}</span>`}
                                 </button>
                                 <button onClick=${(e) => { e.stopPropagation(); onDownload(song); }} className=${`p-1.5 rounded-full transition-all hover:bg-blue-500/10 ${theme === 'dark' ? 'text-gray-400 hover:text-green-500' : 'text-gray-400 hover:text-green-600'}`}><${Download} size=${18} /></button>
                                 <button onClick=${(e) => { e.stopPropagation(); onAddToPlaylist(song); }} title="Add to playlist" className=${`p-1.5 rounded-full transition-all hover:bg-blue-500/10 ${theme === 'dark' ? 'text-gray-400 hover:text-blue-500' : 'text-gray-400 hover:text-blue-600'}`}><${PlusCircle} size=${18} /></button>
@@ -396,7 +365,7 @@
             </div>
         `;
 
-        const generateSlug = async (title, collectionName) => {
+        const generateSlug = async (title, tableName) => {
             let slug = title.toLowerCase()
                 .replace(/[^\w\sа-яё-]/gi, '')
                 .trim()
@@ -409,13 +378,15 @@
             slug = slug.split('').map(char => cyrillicToLatin[char] || char).join('');
             
             let finalSlug = slug;
-            let counter = 1;
             let isUnique = false;
             
             while (!isUnique) {
-                const q = query(collection(db, collectionName), where('slug', '==', finalSlug));
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) {
+                const { data, error } = await supabase
+                    .from(tableName)
+                    .select('slug')
+                    .eq('slug', finalSlug);
+                
+                if (error || !data || data.length === 0) {
                     isUnique = true;
                 } else {
                     finalSlug = `${slug}-${Math.floor(Math.random() * 10000)}`;
@@ -461,24 +432,41 @@
                     let coverUrl = "https://picsum.photos/seed/music/400/400";
                     let coverPath = null;
 
-                    // Upload main file
+                    // Upload main file to Supabase Storage
                     const timestamp = Date.now();
-                    const mainPath = `${type}/${timestamp}_${mainFile.name}`;
-                    const mainRef = ref(storage, mainPath);
-                    await uploadBytes(mainRef, mainFile);
-                    const mainUrl = await getDownloadURL(mainRef);
+                    const bucket = type; // 'music', 'video', 'photo'
+                    const mainFilePath = `${user.id}/${timestamp}_${mainFile.name}`;
+                    
+                    const { data: mainData, error: mainError } = await supabase.storage
+                        .from(bucket)
+                        .upload(mainFilePath, mainFile);
+                    
+                    if (mainError) throw mainError;
+                    
+                    const { data: { publicUrl: mainPublicUrl } } = supabase.storage
+                        .from(bucket)
+                        .getPublicUrl(mainFilePath);
 
-                    if (type === 'music') { audioUrl = mainUrl; audioPath = mainPath; }
-                    else if (type === 'video') { videoUrl = mainUrl; videoPath = mainPath; }
-                    else if (type === 'photo') { photoUrl = mainUrl; photoPath = mainPath; coverUrl = mainUrl; }
+                    if (type === 'music') { audioUrl = mainPublicUrl; audioPath = mainFilePath; }
+                    else if (type === 'video') { videoUrl = mainPublicUrl; videoPath = mainFilePath; }
+                    else if (type === 'photo') { photoUrl = mainPublicUrl; photoPath = mainFilePath; coverUrl = mainPublicUrl; }
 
                     // Upload optional cover for music/video
                     const coverInput = e.currentTarget.querySelector('#cover-input')?.files?.[0];
                     if (coverInput && type !== 'photo') {
-                        coverPath = `covers/${timestamp}_${coverInput.name}`;
-                        const coverStorageRef = ref(storage, coverPath);
-                        await uploadBytes(coverStorageRef, coverInput);
-                        coverUrl = await getDownloadURL(coverStorageRef);
+                        const coverFilePath = `${user.id}/${timestamp}_${coverInput.name}`;
+                        const { data: coverData, error: coverError } = await supabase.storage
+                            .from('covers')
+                            .upload(coverFilePath, coverInput);
+                        
+                        if (coverError) throw coverError;
+                        
+                        const { data: { publicUrl: coverPublicUrl } } = supabase.storage
+                            .from('covers')
+                            .getPublicUrl(coverFilePath);
+                        
+                        coverUrl = coverPublicUrl;
+                        coverPath = coverFilePath;
                     } else if (type === 'video' && !coverInput) {
                         coverUrl = "https://picsum.photos/seed/video/400/400";
                     }
@@ -488,25 +476,30 @@
                     const songData = {
                         type,
                         title: title || 'Unnamed',
-                        artist: artist || user.displayName || 'Anonymous',
+                        artist: artist || user.user_metadata?.full_name || 'Anonymous',
                         genre: tags,
-                        audioUrl, audioPath,
-                        videoUrl, videoPath,
-                        photoUrl, photoPath,
-                        coverUrl, coverPath,
+                        audio_url: audioUrl, audio_path: audioPath,
+                        video_url: videoUrl, video_path: videoPath,
+                        photo_url: photoUrl, photo_path: photoPath,
+                        cover_url: coverUrl, cover_path: coverPath,
                         slug,
-                        authorId: user.uid,
-                        authorEmail: user.email,
-                        createdAt: serverTimestamp(),
-                        favoritesCount: 0,
-                        isUserUploaded: true
+                        author_id: user.id,
+                        author_email: user.email,
+                        favorites_count: 0,
+                        is_user_uploaded: true
                     };
 
-                    const docRef = await addDoc(collection(db, 'songs'), songData);
-                    onUpload({ ...songData, id: docRef.id, createdAt: new Date().toISOString() });
+                    const { data, error } = await supabase
+                        .from('songs')
+                        .insert([songData])
+                        .select();
+
+                    if (error) throw error;
+                    
+                    onUpload(data[0]);
                     onClose();
                 } catch (err) { 
-                    handleFirestoreError(err, OperationType.CREATE, 'songs');
+                    handleSupabaseError(err, 'create', 'songs');
                     alert("Upload failed: " + err.message); 
                     setIsPublishing(false); 
                 }
@@ -613,7 +606,7 @@
                     <div className="p-6 space-y-4">
                         <div className="flex justify-between items-center"><h2 className="text-lg font-black uppercase tracking-tight">${t.addToPlaylist}</h2><button onClick=${onClose}><${X} size=${20} /></button></div>
                         <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5 mb-4">
-                            <img src=${song.coverUrl} className="w-12 h-12 rounded-lg object-cover" />
+                            <img src=${song.cover_url} className="w-12 h-12 rounded-lg object-cover" />
                             <div className="min-w-0"><p className="font-bold text-sm truncate">${song.title}</p><p className="text-xs text-gray-500 truncate">${song.artist}</p></div>
                         </div>
                         <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-2">
@@ -684,7 +677,6 @@
 
         // --- Main App ---
 
-        // --- Error Boundary ---
         class ErrorBoundary extends React.Component {
             constructor(props) { super(props); this.state = { hasError: false, error: null }; }
             static getDerivedStateFromError(error) { return { hasError: true, error }; }
@@ -700,18 +692,6 @@
                     `;
                 }
                 return this.props.children;
-            }
-        }
-
-        // --- Firebase Connection Test ---
-        async function testConnection() {
-            if (!db) return;
-            try {
-                await getDoc(doc(db, 'test', 'connection'));
-            } catch (error) {
-                if (error instanceof Error && error.message.includes('the client is offline')) {
-                    console.error("Please check your Firebase configuration. The client is offline.");
-                }
             }
         }
 
@@ -742,97 +722,123 @@
                     const path = window.location.pathname.substring(1);
                     if (path && !['home', 'explore', 'library', 'search', 'favorites'].includes(path)) {
                         // Check if it's a song slug
-                        const qSong = query(collection(db, 'songs'), where('slug', '==', path));
-                        const songSnap = await getDocs(qSong);
-                        if (!songSnap.empty) {
-                            const song = { id: songSnap.docs[0].id, ...songSnap.docs[0].data() };
-                            handlePlaySong(song);
+                        const { data: songData } = await supabase
+                            .from('songs')
+                            .select('*')
+                            .eq('slug', path)
+                            .single();
+                        
+                        if (songData) {
+                            handlePlaySong(songData);
                             return;
                         }
 
                         // Check if it's a playlist slug
-                        const qPlaylist = query(collection(db, 'playlists'), where('slug', '==', path), where('isPublic', '==', true));
-                        const playlistSnap = await getDocs(qPlaylist);
-                        if (!playlistSnap.empty) {
-                            const playlist = { id: playlistSnap.docs[0].id, ...playlistSnap.docs[0].data() };
-                            setActiveTab(`playlist-${playlist.id}`);
+                        const { data: playlistData } = await supabase
+                            .from('playlists')
+                            .select('*')
+                            .eq('slug', path)
+                            .eq('is_public', true)
+                            .single();
+                        
+                        if (playlistData) {
+                            setActiveTab(`playlist-${playlistData.id}`);
                         }
                     }
                 };
-                if (db) checkSlug();
-            }, [db]);
+                if (supabase) checkSlug();
+            }, [supabase]);
 
             useEffect(() => {
-                const unsubscribe = onAuthStateChanged(auth, (u) => { setUser(u); });
-                return () => unsubscribe();
+                const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                    setUser(session?.user ?? null);
+                });
+                return () => subscription.unsubscribe();
             }, []);
 
             useEffect(() => {
-                const q = query(collection(db, 'songs'), orderBy('createdAt', 'desc'));
-                const unsubscribe = onSnapshot(q, (snapshot) => {
-                    const music = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    setGlobalMusic(music);
-                }, (err) => handleFirestoreError(err, OperationType.GET, 'songs'));
-                return () => unsubscribe();
+                const fetchSongs = async () => {
+                    const { data, error } = await supabase
+                        .from('songs')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    
+                    if (error) handleSupabaseError(error, 'list', 'songs');
+                    else setGlobalMusic(data || []);
+                };
+                
+                fetchSongs();
+                
+                // Realtime subscription
+                const channel = supabase.channel('songs_changes')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'songs' }, payload => {
+                        fetchSongs();
+                    })
+                    .subscribe();
+                
+                return () => supabase.removeChannel(channel);
             }, []);
 
             useEffect(() => {
                 if (!user) { setPlaylists([]); setFavorites([]); return; }
-                const qPlaylists = query(collection(db, 'playlists'), where('authorId', '==', user.uid));
-                const unsubPlaylists = onSnapshot(qPlaylists, (snapshot) => {
-                    setPlaylists(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-                }, (err) => handleFirestoreError(err, OperationType.GET, 'playlists'));
-                const qFavorites = query(collection(db, 'favorites'), where('userId', '==', user.uid));
-                const unsubFavorites = onSnapshot(qFavorites, (snapshot) => {
-                    setFavorites(snapshot.docs.map(doc => doc.data().songId));
-                }, (err) => handleFirestoreError(err, OperationType.GET, 'favorites'));
-                return () => { unsubPlaylists(); unsubFavorites(); };
+                
+                const fetchUserData = async () => {
+                    const { data: playlistsData } = await supabase
+                        .from('playlists')
+                        .select('*')
+                        .eq('author_id', user.id);
+                    setPlaylists(playlistsData || []);
+
+                    const { data: favoritesData } = await supabase
+                        .from('favorites')
+                        .select('song_id')
+                        .eq('user_id', user.id);
+                    setFavorites(favoritesData?.map(f => f.song_id) || []);
+                };
+
+                fetchUserData();
+                
+                const channel = supabase.channel('user_data_changes')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'playlists', filter: `author_id=eq.${user.id}` }, fetchUserData)
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'favorites', filter: `user_id=eq.${user.id}` }, fetchUserData)
+                    .subscribe();
+                
+                return () => supabase.removeChannel(channel);
             }, [user]);
 
             useEffect(() => { setCookie('gm_theme', theme, 30); setCookie('gm_lang', language, 30); document.body.style.backgroundColor = theme === 'dark' ? '#030303' : '#ffffff'; }, [theme, language]);
 
-            const handleLogin = async () => { try { await signInWithPopup(auth, new GoogleAuthProvider()); } catch (err) { alert("Login failed: " + err.message); } };
-            const handleLogout = async () => { try { await signOut(auth); } catch (err) { alert("Logout failed: " + err.message); } };
+            const handleLogin = async () => { try { await supabase.auth.signInWithOAuth({ provider: 'google' }); } catch (err) { alert("Login failed: " + err.message); } };
+            const handleLogout = async () => { try { await supabase.auth.signOut(); } catch (err) { alert("Logout failed: " + err.message); } };
 
             const handleToggleFavorite = async (song) => {
                 if (!user) { alert("Please login to favorite songs"); return; }
-                const favId = `${user.uid}_${song.id}`;
-                const favRef = doc(db, 'favorites', favId);
-                const songRef = doc(db, 'songs', song.id);
+                const isFav = favorites.includes(song.id);
                 try {
-                    await runTransaction(db, async (transaction) => {
-                        const favDoc = await transaction.get(favRef);
-                        if (favDoc.exists()) {
-                            transaction.delete(favRef);
-                            transaction.update(songRef, { favoritesCount: increment(-1) });
-                        } else {
-                            transaction.set(favRef, { userId: user.uid, songId: song.id, createdAt: serverTimestamp() });
-                            transaction.update(songRef, { favoritesCount: increment(1) });
-                        }
-                    });
-                } catch (err) { handleFirestoreError(err, OperationType.WRITE, 'favorites/songs'); }
+                    if (isFav) {
+                        await supabase.from('favorites').delete().eq('user_id', user.id).eq('song_id', song.id);
+                        await supabase.from('songs').update({ favorites_count: Math.max(0, (song.favorites_count || 0) - 1) }).eq('id', song.id);
+                    } else {
+                        await supabase.from('favorites').insert([{ user_id: user.id, song_id: song.id }]);
+                        await supabase.from('songs').update({ favorites_count: (song.favorites_count || 0) + 1 }).eq('id', song.id);
+                    }
+                } catch (err) { handleSupabaseError(err, 'write', 'favorites/songs'); }
             };
 
             const handleDeleteSong = async (song) => {
-                if (!user || song.authorId !== user.uid) return;
+                if (!user || song.author_id !== user.id) return;
                 if (!confirm("Are you sure you want to delete this song?")) return;
                 try {
-                    // Delete from Firestore
-                    await deleteDoc(doc(db, 'songs', song.id));
+                    await supabase.from('songs').delete().eq('id', song.id);
                     
-                    // Delete from Storage
-                    if (song.audioPath) {
-                        const audioStorageRef = ref(storage, song.audioPath);
-                        await deleteObject(audioStorageRef).catch(e => console.error("Audio delete failed:", e));
-                    }
-                    if (song.coverPath) {
-                        const coverStorageRef = ref(storage, song.coverPath);
-                        await deleteObject(coverStorageRef).catch(e => console.error("Cover delete failed:", e));
-                    }
+                    if (song.audio_path) await supabase.storage.from('music').remove([song.audio_path]);
+                    if (song.video_path) await supabase.storage.from('video').remove([song.video_path]);
+                    if (song.photo_path) await supabase.storage.from('photo').remove([song.photo_path]);
+                    if (song.cover_path) await supabase.storage.from('covers').remove([song.cover_path]);
 
                     if (currentSong?.id === song.id) { setCurrentSong(null); setIsPlaying(false); }
                 } catch (err) { 
-                    handleFirestoreError(err, OperationType.DELETE, `songs/${song.id}`);
+                    handleSupabaseError(err, 'delete', `songs/${song.id}`);
                     alert("Delete failed: " + err.message); 
                 }
             };
@@ -840,41 +846,42 @@
             const handleCreatePlaylist = async (playlistData) => {
                 if (!user) return;
                 try {
-                    await addDoc(collection(db, 'playlists'), {
+                    await supabase.from('playlists').insert([{
                         name: playlistData.name,
                         icon: playlistData.icon || null,
-                        isPublic: playlistData.isPublic,
+                        is_public: playlistData.isPublic,
                         slug: playlistData.slug,
-                        authorId: user.uid,
-                        songIds: [],
-                        createdAt: serverTimestamp()
-                    });
+                        author_id: user.id,
+                        song_ids: []
+                    }]);
                     setIsCreatePlaylistOpen(false);
                 } catch (err) { 
-                    handleFirestoreError(err, OperationType.CREATE, 'playlists');
+                    handleSupabaseError(err, 'create', 'playlists');
                     alert("Playlist creation failed: " + err.message); 
                 }
             };
 
             const handleAddSongToPlaylist = async (playlistId, songId) => {
                 try {
-                    await updateDoc(doc(db, 'playlists', playlistId), {
-                        songIds: arrayUnion(songId)
-                    });
+                    const playlist = playlists.find(p => p.id === playlistId);
+                    if (!playlist) return;
+                    const newSongIds = [...(playlist.song_ids || []), songId];
+                    await supabase.from('playlists').update({ song_ids: newSongIds }).eq('id', playlistId);
                     setSongToAddToPlaylist(null);
                 } catch (err) { 
-                    handleFirestoreError(err, OperationType.UPDATE, `playlists/${playlistId}`);
+                    handleSupabaseError(err, 'update', `playlists/${playlistId}`);
                     alert("Failed to add song: " + err.message); 
                 }
             };
 
             const handleRemoveSongFromPlaylist = async (playlistId, songId) => {
                 try {
-                    await updateDoc(doc(db, 'playlists', playlistId), {
-                        songIds: arrayRemove(songId)
-                    });
+                    const playlist = playlists.find(p => p.id === playlistId);
+                    if (!playlist) return;
+                    const newSongIds = (playlist.song_ids || []).filter(id => id !== songId);
+                    await supabase.from('playlists').update({ song_ids: newSongIds }).eq('id', playlistId);
                 } catch (err) { 
-                    handleFirestoreError(err, OperationType.UPDATE, `playlists/${playlistId}`);
+                    handleSupabaseError(err, 'update', `playlists/${playlistId}`);
                     alert("Failed to remove song: " + err.message); 
                 }
             };
@@ -904,15 +911,15 @@
                     setCurrentSong(song); 
                     setIsPlaying(true); 
                     if (audioRef.current) { 
-                        audioRef.current.src = song.audioUrl || ''; 
-                        if (song.audioUrl) audioRef.current.play().catch(e => console.error("Play failed:", e)); 
+                        audioRef.current.src = song.audio_url || ''; 
+                        if (song.audio_url) audioRef.current.play().catch(e => console.error("Play failed:", e)); 
                     } 
                     if (song.type === 'video') setPlayerMode('video');
                     else setPlayerMode('audio');
                 }
             };
 
-            const handleDownload = (song) => { const a = document.createElement('a'); a.href = song.audioUrl; a.download = `${song.artist} - ${song.title}.mp3`; a.click(); };
+            const handleDownload = (song) => { const a = document.createElement('a'); a.href = song.audio_url; a.download = `${song.artist} - ${song.title}.mp3`; a.click(); };
             const playNext = useCallback(() => {
                 const queue = activeTab === 'search' ? results : globalMusic;
                 if (!currentSong || queue.length === 0) return;
@@ -957,7 +964,7 @@
                     const pId = activeTab.replace('playlist-', '');
                     const p = playlists.find(pl => pl.id === pId);
                     if (!p) return null;
-                    const playlistSongs = globalMusic.filter(s => p.songIds.includes(s.id));
+                    const playlistSongs = globalMusic.filter(s => p.song_ids?.includes(s.id));
                     return h`
                         <div className="space-y-8">
                             <div className="flex flex-col md:flex-row items-center gap-8">
@@ -1013,9 +1020,9 @@
                         </div>
                     `;
                 }
-                if (activeTab === 'explore') return h`<div className="space-y-10"><section><h2 className="text-xl md:text-3xl font-black mb-8 uppercase tracking-tight">${t.playlists}</h2><div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${playlists.map(p => h`<div key=${p.id} className=${`p-5 rounded-[40px] cursor-pointer transition-all border group relative ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:border-blue-500'}`} onClick=${() => setActiveTab(`playlist-${p.id}`)}><button onClick=${(e) => { e.stopPropagation(); handleSharePlaylist(p); }} className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"><${Share2} size=${16} /></button><div className="aspect-square rounded-3xl overflow-hidden mb-4 bg-black/20 flex items-center justify-center">${p.icon ? h`<img src=${p.icon} className="w-full h-full object-cover" />` : h`<${ListMusic} size=${40} className="text-blue-500" />`}</div><h3 className="font-bold text-lg truncate">${p.name}</h3><p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">${p.songIds.length} треков</p></div>`)}<button onClick=${() => setIsCreatePlaylistOpen(true)} className="p-5 rounded-[40px] border-2 border-dashed flex flex-col items-center justify-center gap-3"><${Plus} size=${32} /><span className="font-black text-xs uppercase tracking-widest">${t.createPlaylist}</span></button></div></section></div>`;
+                if (activeTab === 'explore') return h`<div className="space-y-10"><section><h2 className="text-xl md:text-3xl font-black mb-8 uppercase tracking-tight">${t.playlists}</h2><div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">${playlists.map(p => h`<div key=${p.id} className=${`p-5 rounded-[40px] cursor-pointer transition-all border group relative ${theme === 'dark' ? 'bg-white/5 border-white/5 hover:bg-white/10' : 'bg-white border-gray-100 hover:border-blue-500'}`} onClick=${() => setActiveTab(`playlist-${p.id}`)}><button onClick=${(e) => { e.stopPropagation(); handleSharePlaylist(p); }} className="absolute top-4 right-4 p-2 bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"><${Share2} size=${16} /></button><div className="aspect-square rounded-3xl overflow-hidden mb-4 bg-black/20 flex items-center justify-center">${p.icon ? h`<img src=${p.icon} className="w-full h-full object-cover" />` : h`<${ListMusic} size=${40} className="text-blue-500" />`}</div><h3 className="font-bold text-lg truncate">${p.name}</h3><p className="text-xs font-bold text-gray-500 mt-1 uppercase tracking-widest">${p.song_ids?.length || 0} треков</p></div>`)}<button onClick=${() => setIsCreatePlaylistOpen(true)} className="p-5 rounded-[40px] border-2 border-dashed flex flex-col items-center justify-center gap-3"><${Plus} size=${32} /><span className="font-black text-xs uppercase tracking-widest">${t.createPlaylist}</span></button></div></section></div>`;
                 if (activeTab === 'library') {
-                    const mySongs = globalMusic.filter(s => user && s.authorId === user.uid);
+                    const mySongs = globalMusic.filter(s => user && s.author_id === user.id);
                     return h`
                         <div className="space-y-10">
                             <h2 className="text-2xl md:text-4xl font-black mb-10">${t.library}</h2>
@@ -1080,77 +1087,20 @@
                 `);
             };
 
-            if (!firebaseConfig || !firebaseConfig.projectId) {
+            if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
                 renderError(
-                    "Конфигурация не найдена",
-                    "Пожалуйста, проверьте настройки Firebase в коде index.html.",
-                    ["Убедитесь, что объект firebaseConfig заполнен корректными данными из консоли Firebase."]
+                    "Supabase не настроен",
+                    "Пожалуйста, добавьте SUPABASE_URL и SUPABASE_ANON_KEY в коде index.html.",
+                    [
+                        "Создайте проект на supabase.com",
+                        "Скопируйте Project URL и Anon Key из настроек API",
+                        "Вставьте их в соответствующие переменные в начале скрипта"
+                    ]
                 );
                 return;
             }
 
             try {
-                console.log("Initializing Firebase app...");
-                const app = initializeApp(firebaseConfig);
-                
-                console.log("Initializing Firestore...");
-                const useNamed = firebaseConfig.firestoreDatabaseId && 
-                                firebaseConfig.firestoreDatabaseId !== '(default)' && 
-                                firebaseConfig.firestoreDatabaseId !== '';
-                
-                const consoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`;
-                const authSettingsUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;
-
-                try {
-                    if (useNamed) {
-                        console.log(`Using named database: ${firebaseConfig.firestoreDatabaseId}`);
-                        db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-                    } else {
-                        console.log("Using default database");
-                        db = getFirestore(app);
-                    }
-                    
-                    // Probe check to verify service availability
-                    await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                        // If it's just a permission error or not found, it means the service IS available
-                        if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                        // If it's a "database not found" error or "service not available", we should try the default one
-                        if (err.message.includes('not found') || err.message.includes('not available') || err.message.includes('offline')) throw err;
-                    });
-                } catch (e) {
-                    console.warn("Database initialization failed, trying fallback to (default)...", e.message);
-                    try {
-                        // Fallback to default if named failed
-                        db = getFirestore(app);
-                        await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                            if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                            throw err;
-                        });
-                    } catch (e2) {
-                        const isVercel = window.location.hostname.includes('vercel.app');
-                        const errorMsg = e2.message || String(e2);
-                        const isConfigMismatch = errorMsg.includes('not found') || errorMsg.includes('not available');
-                        
-                        renderError(
-                            "Firestore недоступен",
-                            `Ошибка: ${errorMsg}`,
-                            [
-                                h`<b>Проект:</b> <span class="text-blue-400">${firebaseConfig.projectId}</span>`,
-                                h`<b>База данных:</b> <span class="text-blue-400">${firebaseConfig.firestoreDatabaseId || '(default)'}</span>`,
-                                h`<hr class="border-white/10 my-2" />`,
-                                h`1. Перейдите в <a href="${consoleUrl}" target="_blank" class="text-blue-500 underline font-black">Firebase Console -> Firestore</a> и нажмите <b>"Create Database"</b>.`,
-                                h`2. Убедитесь, что база данных с ID <b>${firebaseConfig.firestoreDatabaseId || '(default)'}</b> создана.`,
-                                isVercel ? h`3. Перейдите в <a href="${authSettingsUrl}" target="_blank" class="text-blue-500 underline font-black">Auth -> Settings -> Authorized Domains</a> и добавьте <b>${window.location.hostname}</b>.` : "3. Если вы запускаете проект локально, проверьте интернет.",
-                                h`4. Если вы используете свой проект, обновите <b>firebaseConfig</b> в коде index.html.`
-                            ]
-                        );
-                        return;
-                    }
-                }
-
-                auth = getAuth(app);
-                storage = getStorage(app);
-                
                 // Gemini API Key Handling
                 let apiKey = '{{GEMINI_API_KEY}}';
                 if (apiKey.startsWith('{{')) {
@@ -1159,11 +1109,9 @@
                 }
                 ai = new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
 
-                if (db && auth) {
-                    ReactDOM.createRoot(rootElement).render(
-                        h(ErrorBoundary, null, h(App))
-                    );
-                }
+                ReactDOM.createRoot(rootElement).render(
+                    h(ErrorBoundary, null, h(App))
+                );
             } catch (error) {
                 console.error("Initialization error:", error);
                 renderError("Ошибка запуска", error.message);
