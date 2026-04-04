@@ -1,0 +1,9 @@
+{
+  "name": "Grishka Music & Video",
+  "description": "Платформа для публикации и прослушивания музыки, видео и фото с интеграцией Supabase.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera",
+    "geolocation"
+  ]
+}
