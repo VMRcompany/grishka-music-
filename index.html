@@ -1098,54 +1098,16 @@
                                 firebaseConfig.firestoreDatabaseId !== '(default)' && 
                                 firebaseConfig.firestoreDatabaseId !== '';
                 
-                const consoleUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/firestore`;
-                const authSettingsUrl = `https://console.firebase.google.com/project/${firebaseConfig.projectId}/authentication/settings`;
-
                 try {
                     if (useNamed) {
                         console.log(`Using named database: ${firebaseConfig.firestoreDatabaseId}`);
                         db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
                     } else {
-                        console.log("Using default database");
                         db = getFirestore(app);
                     }
-                    
-                    // Probe check to verify service availability
-                    await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                        // If it's just a permission error or not found, it means the service IS available
-                        if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                        // If it's a "database not found" error or "service not available", we should try the default one
-                        if (err.message.includes('not found') || err.message.includes('not available') || err.message.includes('offline')) throw err;
-                    });
                 } catch (e) {
-                    console.warn("Database initialization failed, trying fallback to (default)...", e.message);
-                    try {
-                        // Fallback to default if named failed
-                        db = getFirestore(app);
-                        await getDoc(doc(db, '_internal_', 'probe')).catch(err => {
-                            if (err.code === 'permission-denied' || err.code === 'not-found') return;
-                            throw err;
-                        });
-                    } catch (e2) {
-                        const isVercel = window.location.hostname.includes('vercel.app');
-                        const errorMsg = e2.message || String(e2);
-                        const isConfigMismatch = errorMsg.includes('not found') || errorMsg.includes('not available');
-                        
-                        renderError(
-                            "Firestore недоступен",
-                            `Ошибка: ${errorMsg}`,
-                            [
-                                h`<b>Проект:</b> <span class="text-blue-400">${firebaseConfig.projectId}</span>`,
-                                h`<b>База данных:</b> <span class="text-blue-400">${firebaseConfig.firestoreDatabaseId || '(default)'}</span>`,
-                                h`<hr class="border-white/10 my-2" />`,
-                                h`1. Перейдите в <a href="${consoleUrl}" target="_blank" class="text-blue-500 underline font-black">Firebase Console -> Firestore</a> и нажмите <b>"Create Database"</b>.`,
-                                h`2. Убедитесь, что база данных с ID <b>${firebaseConfig.firestoreDatabaseId || '(default)'}</b> создана.`,
-                                isVercel ? h`3. Перейдите в <a href="${authSettingsUrl}" target="_blank" class="text-blue-500 underline font-black">Auth -> Settings -> Authorized Domains</a> и добавьте <b>${window.location.hostname}</b>.` : "3. Если вы запускаете проект локально, проверьте интернет.",
-                                h`4. Если вы используете свой проект, обновите <b>firebaseConfig</b> в коде index.html.`
-                            ]
-                        );
-                        return;
-                    }
+                    console.warn("Named database init failed, falling back to default", e);
+                    db = getFirestore(app);
                 }
 
                 auth = getAuth(app);
@@ -1166,7 +1128,7 @@
                 }
             } catch (error) {
                 console.error("Initialization error:", error);
-                renderError("Ошибка запуска", error.message);
+                // Silent fallback or simple log instead of blocking screen
             }
         }
 
